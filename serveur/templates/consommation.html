@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Consommation — segment par segment</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="panel">
+    <div>
+      <div class="panel-title">⚡ Consommation</div>
+      <div class="panel-sub">
+        Consommation simulée (modèle physique road-load) segment par segment.
+        Clic sur un segment du graphique → surlignage sur
+        <a href="/" target="_blank" style="color:var(--accent);">la carte</a>.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Mode de sélection</div>
+      <label class="chk-row"><input type="radio" name="selMode" value="voyage" checked> Voyage précis</label>
+      <label class="chk-row"><input type="radio" name="selMode" value="mois"> Mois × parcours</label>
+      <label class="chk-row"><input type="radio" name="selMode" value="temp"> Température × parcours</label>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Parcours</div>
+      <input type="text" id="parcoursSearch" placeholder="🔍 Filtrer les parcours…" autocomplete="off" style="margin-bottom:6px;">
+      <select id="parcoursSelect" size="6"></select>
+    </div>
+
+    <!-- Mode Voyage -->
+    <div class="section" id="blockVoyage">
+      <div class="sec-label">Voyage</div>
+      <input type="text" id="voyageSearch" placeholder="🔍 Numéro de voyage…" autocomplete="off" style="margin-bottom:6px;">
+      <select id="voyageSelect" size="8"></select>
+      <div class="instructions" id="voyageHint">Choisissez d'abord un parcours.</div>
+    </div>
+
+    <!-- Mode Mois -->
+    <div class="section" id="blockMois" style="display:none;">
+      <div class="sec-label">Mois (multi-sélection)</div>
+      <div class="btn-row">
+        <button class="action-btn" id="btnMoisAll">Tout sélectionner</button>
+        <button class="action-btn" id="btnMoisNone">Tout désélectionner</button>
+      </div>
+      <div id="moisCheckboxes" class="mois-grid"></div>
+    </div>
+
+    <!-- Mode Température -->
+    <div class="section" id="blockTemp" style="display:none;">
+      <div class="sec-label">Plage de température (°C)</div>
+      <div class="temp-row">
+        <label>min <input type="number" id="tempMin" step="1" style="width:70px;"></label>
+        <label>max <input type="number" id="tempMax" step="1" style="width:70px;"></label>
+      </div>
+    </div>
+
+    <div class="section">
+      <button class="action-btn primary" id="btnTracer">Tracer la consommation</button>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Affichage</div>
+      <div class="btn-row">
+        <button class="action-btn primary" id="btnUnitWh">Wh</button>
+        <button class="action-btn" id="btnUnitKwhKm">kWh/km</button>
+      </div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkMoyenne"> Consommation moyenne (parcours)
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" id="chkDecomp"> Décomposition des facteurs (traction + auxiliaires)
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" id="chkTracerCarte" checked> Tracer le voyage sur la carte
+      </label>
+      <div class="instructions">Le tracé apparaît dans l'onglet carte (ouvrez-le avec le
+        bouton ci-dessous).</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Statistiques</div>
+      <div class="stats-grid">
+        <div class="k">Parcours</div><div class="v" id="statParcours">—</div>
+        <div class="k">Observations</div><div class="v" id="statNobs">—</div>
+        <div class="k">Segments</div><div class="v" id="statNseg">—</div>
+        <div class="k">Conso totale</div><div class="v" id="statTotal">—</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Navigation</div>
+      <button class="action-btn" id="btnOpenCarte">Ouvrir la carte ⧉</button>
+      <button class="action-btn" id="btnOpenSimulation">Ouvrir la simulation 🚌</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div id="main-view">
+    <div id="sync-status">
+      <span class="indicator"></span>
+      <span class="label">Synchronisation active</span>
+    </div>
+
+    <div class="floating-header">
+      <div class="title">Consommation par segment</div>
+      <div class="detail" id="hintText">
+        Sélectionnez un voyage ou un combo, puis « Tracer ». Clic sur un segment = surlignage sur la carte.
+      </div>
+    </div>
+
+    <div id="consoChart"></div>
+    <div id="consoEmpty" class="conso-empty">Aucune donnée tracée pour l'instant.</div>
+  </div>
+</div>
+
+<!-- Données serveur -->
+<script>
+  const CONSO_DISPONIBLE = {{ conso_disponible | tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='sync.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='consommation.js') }}?v=3"></script>
+
+</body>
+</html>

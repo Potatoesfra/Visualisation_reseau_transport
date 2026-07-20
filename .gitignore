@@ -1,0 +1,29 @@
+# Environnements / caches Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Données brutes volumineuses : non versionnées (voir data_brute/README.md
+# et scripts/telecharger_donnees.py pour les récupérer).
+# Exceptions légères versionnées : README, normales climatiques et stops.txt
+# (requis par le serveur pour afficher les arrêts dès le clone).
+data_brute/*
+!data_brute/README.md
+!data_brute/normales_climatiques_montreal.csv
+!data_brute/gtfs_stm/
+data_brute/gtfs_stm/*
+!data_brute/gtfs_stm/stops.txt
+
+# --- GTFS requis au runtime (parcours + arrêts) ---
+!data_brute/gtfs_stm/trips.txt
+!data_brute/gtfs_stm/directions.txt
+!data_brute/gtfs_stm/route_patterns.txt
+
+# --- Intermédiaires data_derivee NON lus par le serveur (~53 Mo) ---
+data_derivee/conso_synthetique_segments_merge_identiques.parquet
+data_derivee/attributs_segments.gpkg
+data_derivee/attributs_segments_merge_identiques.gpkg
+data_derivee/relations_segments.gpkg
+data_derivee/relations_segments_merge_identiques.gpkg
+data_derivee/shapes_par_ligne.gpkg

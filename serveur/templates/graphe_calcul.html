@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Graphe de calcul — Arbre de voisinage</title>
+  <script src="https://unpkg.com/cytoscape@3.29.2/dist/cytoscape.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .depth-display {
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--accent); text-align: center; margin: 4px 0;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    #warningBanner {
+      display: none;
+      background: rgba(255,183,77,0.15); border: 1px solid var(--warning);
+      color: var(--warning); border-radius: 5px;
+      padding: 6px 10px; font-size: 0.75rem;
+    }
+    #rootList { font-size: 0.75rem; color: var(--text-muted); word-break: break-all; }
+
+    /* Menu contextuel clic droit */
+    #ctxMenu {
+      display: none; position: absolute; z-index: 3000;
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 7px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      min-width: 200px; padding: 4px 0; font-size: 0.8rem;
+    }
+    .ctx-header {
+      font-size: 0.7rem; color: var(--text-muted); padding: 5px 12px 3px;
+      border-bottom: 1px solid var(--border); margin-bottom: 2px;
+    }
+    .ctx-item {
+      padding: 7px 14px; cursor: pointer; color: var(--text);
+      transition: background 0.1s;
+    }
+    .ctx-item:hover { background: var(--bg-element); }
+    .ctx-item.ctx-disabled { color: var(--text-dim); cursor: default; }
+    .ctx-item.ctx-disabled:hover { background: transparent; }
+    .ctx-close { color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 2px; }
+
+    /* Grille des paramètres de layout */
+    .param-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 12px;
+    }
+    .param-cell { display: flex; flex-direction: column; gap: 2px; }
+    .param-label { font-size: 0.68rem; color: var(--text-muted); }
+    .param-input { width: 100%; padding: 3px 5px; font-size: 0.78rem; }
+
+    details > summary {
+      cursor: pointer;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 4px 0;
+      user-select: none;
+      list-style: none;
+    }
+    details > summary::before { content: "▶ "; font-size: 0.65rem; }
+    details[open] > summary::before { content: "▼ "; }
+
+    #layoutParamsStatus {
+      font-size: 0.72rem; color: var(--text-muted);
+      padding: 3px 0; min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="panel">
+    <div>
+      <div class="panel-title">🌳 Graphe de calcul</div>
+      <div class="panel-sub">
+        Arbre de voisinage des nœuds sélectionnés.<br>
+        Les doublons sont autorisés — chaque chemin est représenté.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Nœuds racines</div>
+      <div id="rootList">Chargement…</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Profondeur de l'arbre</div>
+      <div class="depth-display"><span id="depthValue">1</span> niveau(x)</div>
+      <input type="range" id="depthSlider" min="1" max="5" value="1" step="1">
+      <div class="instructions">Profondeur max (slider). En mode expansion manuelle, chaque clic droit « Étendre » descend d'1 niveau.</div>
+      <label class="chk-row" style="margin-top:4px;">
+        <input type="checkbox" id="chkExpandMode" checked>
+        <span>Expansion manuelle (clic droit sur les nœuds)</span>
+      </label>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Types de relations inclus</div>
+      <div id="relTypeCheckboxes"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Actions</div>
+      <div class="btn-row">
+        <button class="action-btn" id="btnFit">Recadrer</button>
+        <button class="action-btn" id="btnRelayout">Relancer layout</button>
+      </div>
+      <button class="action-btn" id="btnRebuild">Reconstruire l'arbre</button>
+      <button class="action-btn primary" id="btnShowInGraph">📊 Afficher dans le graphe</button>
+      <button class="action-btn" id="btnEdgeHover">🔍 Activer hover liens</button>
+    </div>
+
+    <div class="section">
+      <div id="warningBanner"></div>
+      <div class="sec-label">Statistiques</div>
+      <div class="stats-grid">
+        <div class="k">Total (unique)</div><div class="v" id="statTotalUnique">—</div>
+        <div class="k">Total (doublons)</div><div class="v" id="statTotalDup">—</div>
+        <div class="k">Racines</div><div class="v" id="statRoots">0</div>
+        <div class="k">Nœuds affichés</div><div class="v" id="statNodes">0</div>
+        <div class="k">Arêtes</div><div class="v" id="statEdges">0</div>
+        <div class="k">Profondeur max</div><div class="v" id="statDepth">0</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Limite de nœuds</div>
+      <input type="number" id="inputMaxNodes" value="1500" min="50" max="10000" step="50">
+      <div class="instructions">Max nœuds dans l'arbre avant troncature</div>
+    </div>
+
+    <div class="section">
+      <details>
+        <summary>Paramètres de layout (physique)</summary>
+
+        <div style="margin-top:8px;">
+          <label class="chk-row" style="margin-bottom:6px;">
+            <input type="checkbox" id="chkUltraLight" checked>
+            <span>Mode ultra-léger (masque les labels pendant l'animation)</span>
+          </label>
+        </div>
+
+        <div class="param-grid" style="margin-top:6px;">
+          <div class="param-cell">
+            <span class="param-label">Répulsion</span>
+            <input class="param-input" type="number" id="param_repulsion" value="5000" min="300" max="30000" step="100">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Ressort (springK)</span>
+            <input class="param-input" type="number" id="param_springK" value="0.042" min="0.001" max="0.3" step="0.001">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Gravité (gravityK)</span>
+            <input class="param-input" type="number" id="param_gravityK" value="0.115" min="0.001" max="0.5" step="0.005">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Centre X (centerXK)</span>
+            <input class="param-input" type="number" id="param_centerXK" value="0.0035" min="0" max="0.05" step="0.001">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Cluster parent</span>
+            <input class="param-input" type="number" id="param_parentClusterK" value="0.16" min="0" max="0.6" step="0.01">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Répulsion niveau</span>
+            <input class="param-input" type="number" id="param_sameLevelRepulsionK" value="760" min="0" max="8000" step="50">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Blob attract</span>
+            <input class="param-input" type="number" id="param_siblingBlobAttractK" value="0.048" min="0" max="0.4" step="0.005">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Blob centre</span>
+            <input class="param-input" type="number" id="param_siblingBlobCenterK" value="0.022" min="0" max="0.3" step="0.005">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Collision blobs (K)</span>
+            <input class="param-input" type="number" id="param_blobCollisionK" value="0.52" min="0" max="2.5" step="0.05">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Gap collision (px)</span>
+            <input class="param-input" type="number" id="param_blobCollisionGap" value="24" min="0" max="140" step="4">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Bas profond</span>
+            <input class="param-input" type="number" id="param_deepestDownK" value="0.08" min="0" max="0.6" step="0.01">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Amortissement</span>
+            <input class="param-input" type="number" id="param_damping" value="0.84" min="0.35" max="0.98" step="0.01">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Vitesse max (px)</span>
+            <input class="param-input" type="number" id="param_maxSpeed" value="13" min="1" max="80" step="1">
+          </div>
+          <div class="param-cell">
+            <span class="param-label">Pas simulation</span>
+            <input class="param-input" type="number" id="param_steps" value="240" min="30" max="5000" step="10">
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="action-btn" id="btnApplyParams">Appliquer</button>
+          <button class="action-btn primary" id="btnSaveParams">Sauvegarder</button>
+          <button class="action-btn danger" id="btnResetParams">Reset</button>
+        </div>
+        <div id="layoutParamsStatus">Paramètres par défaut actifs.</div>
+      </details>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Légende des relations</div>
+      <div id="legend"></div>
+    </div>
+  </aside>
+
+  <!-- ============ GRAPHE ============ -->
+  <div id="main-view">
+    <div class="floating-header">
+      <div class="title">Arbre de voisinage</div>
+      <div class="detail">
+        Racines en haut · Chaque niveau = un degré de voisinage · Doublons autorisés
+      </div>
+    </div>
+    <div id="cy"></div>
+
+    <!-- Menu contextuel clic droit -->
+    <div id="ctxMenu">
+      <div class="ctx-header" id="ctxNodeInfo">Nœud</div>
+      <div class="ctx-item" id="ctxExpand">🌿 Étendre ce nœud</div>
+      <div class="ctx-item" id="ctxExpandLevel">🌳 Étendre tout ce niveau</div>
+      <div class="ctx-item" id="ctxCollapse">✂ Réduire ce nœud</div>
+      <div class="ctx-item" id="ctxCollapseLevel">✂ Réduire tout ce niveau</div>
+      <div class="ctx-item ctx-close" id="ctxClose">✕ Fermer</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const SERVER_META = {
+    couleurs: {{ couleurs | tojson }},
+    types_relations: {{ types_relations | tojson }},
+  };
+</script>
+<script src="{{ url_for('static', filename='sync.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='graphe_calcul.js') }}?v=7"></script>
+
+</body>
+</html>

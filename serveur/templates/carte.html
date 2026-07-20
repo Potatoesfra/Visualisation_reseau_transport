@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Carte — Relations entre segments</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=4">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="panel">
+    <div>
+      <div class="panel-title">🗺️ Carte des segments</div>
+      <div class="panel-sub">
+        Vue géographique. Cliquez un segment pour le sélectionner (Ctrl+clic pour en ajouter).
+        Synchro avec <a href="/graphe" target="_blank" style="color:var(--accent);">la vue graphe</a>.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Mode segments</div>
+      <div class="btn-row">
+        <button class="action-btn primary" id="btnModeNormal">Normal</button>
+        <button class="action-btn" id="btnModeFusion">Fusion</button>
+      </div>
+      <div class="instructions">« Fusion » : les segments partageant les mêmes arrêts de départ et d'arrivée (toutes lignes) sont regroupés en un seul nœud.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Lignes</div>
+      <select id="lineSelect" multiple></select>
+      <div class="instructions">Cliquez pour ajouter une ligne ; la croix ✕ sur une puce la retire.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Parcours types</div>
+      <select id="parcoursSelect" multiple></select>
+      <div class="instructions">Optionnel. Vide = tous les parcours des lignes choisies. Sinon, affine l'affichage à ces parcours (direction · destination, issus du GTFS).</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Types de relations</div>
+      <div id="relTypeCheckboxes"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Affichage</div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkShowStops" checked>
+        Afficher les arrêts
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" id="chkShowRelArcs" checked>
+        Tracer les arcs de relation
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" id="chkHighlightOnHover" checked>
+        Surligner au survol
+      </label>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Fonds et couches</div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkRelief">
+        Relief (MNT Copernicus)
+      </label>
+      <input type="range" id="reliefOpacity" min="0" max="100" value="60"
+             title="Opacité du relief" style="width:100%;">
+      <label class="chk-row">
+        <input type="checkbox" id="chkReseauRoutier">
+        Réseau routier (routable)
+      </label>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Trajet personnalisé (modèle physique)</div>
+      <button class="action-btn" id="btnOuvrirTrajet">🛠️ Outil de création de trajet</button>
+      <div class="instructions">Construisez un trajet jalon par jalon (routage sur le
+        réseau routier réel, énergie estimée par le modèle road-load), puis
+        exportez-le : il devient sélectionnable dans la liste des lignes.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Actions</div>
+      <button class="action-btn danger" id="btnClear">Effacer la sélection</button>
+      <button class="action-btn" id="btnFitSelection">Recadrer sur la sélection</button>
+      <button class="action-btn" id="btnOpenGraph">Ouvrir le graphe ⧉</button>
+      <button class="action-btn" id="btnOpenConso">Ouvrir la consommation ⚡</button>
+      <button class="action-btn" id="btnOpenSimulation">Ouvrir la simulation 🚌</button>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Statistiques</div>
+      <div class="stats-grid">
+        <div class="k">Segments</div><div class="v" id="statTotalSeg">—</div>
+        <div class="k">Sélectionnés</div><div class="v" id="statSelSeg">0</div>
+        <div class="k">Relations affichées</div><div class="v" id="statRelShown">0</div>
+        <div class="k">Lignes visibles</div><div class="v" id="statLines">—</div>
+      </div>
+      <div id="statSegInfo" class="stat-seg-info">
+        <div class="instructions">Sélectionnez un segment sur la carte pour voir ses
+          caractéristiques physiques (distance, dénivelé, feux, vitesse max…).</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAP ============ -->
+  <div id="main-view">
+    <div id="sync-status">
+      <span class="indicator"></span>
+      <span class="label">Synchronisation active</span>
+    </div>
+
+    <div class="floating-header">
+      <div class="title">Carte des relations</div>
+      <div class="detail" id="hintText">
+        Clic = sélectionner | Ctrl+clic = ajouter | Lasso désactivé (utilisez le graphe pour la multi-sélection rapide)
+      </div>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Panneau d'info segment (bas-droite) -->
+    <div id="seg-info-panel">
+      <div class="header">
+        <div class="title" id="segInfoTitle">Segment</div>
+        <button class="close-btn" onclick="closeSegInfo()">×</button>
+      </div>
+      <div id="segInfoBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OUTIL DE CRÉATION DE TRAJET (overlay) ============ -->
+<div id="trajet-overlay">
+  <div class="trajet-modal">
+    <div class="trajet-header">
+      <div class="title">🛠️ Outil de création de trajet</div>
+      <button class="close-btn" id="btnTrajetFermer" title="Fermer l'outil">×</button>
+    </div>
+    <div class="trajet-body">
+      <div class="trajet-panel">
+        <div class="trajet-panel-scroll">
+          <div class="instructions">
+            Cliquez sur la carte pour ajouter des jalons (itinéraire routé sur le
+            réseau réel). Glissez un jalon pour le déplacer, 📍 pour l'accrocher à
+            un arrêt, ou <b>clic droit sur un tronçon → « Déplacer ce tronçon »</b>
+            pour dévier l'itinéraire sur une autre voie (sans créer d'arrêt).
+          </div>
+
+          <div class="fold-section" data-fold="lignes">
+            <button type="button" class="sec-label fold-header">
+              <span class="fold-caret">▾</span> Lignes créées
+            </button>
+            <div class="fold-body">
+              <div id="lignesPersoManager" class="perso-manager">
+                <div class="instructions">Aucune ligne créée pour l'instant.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fold-section" data-fold="jalons">
+            <button type="button" class="sec-label fold-header">
+              <span class="fold-caret">▾</span> Jalons
+            </button>
+            <div class="fold-body">
+              <div id="trajetJalonsList" class="jalons-list">
+                <div class="instructions">Aucun jalon — cliquez sur la carte.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fold-section" data-fold="params">
+            <button type="button" class="sec-label fold-header">
+              <span class="fold-caret">▾</span> Paramètres
+            </button>
+            <div class="fold-body">
+              <div class="temp-row">
+                <label>passagers <input type="number" id="trajetCharge" value="20" min="0" max="60" step="1" style="width:56px;"></label>
+                <label>mois <select id="trajetMois" style="width:70px;"></select></label>
+              </div>
+            </div>
+          </div>
+
+          <div id="trajetResume" class="trajet-resume" style="display:none;"></div>
+        </div>
+
+        <div class="trajet-panel-footer">
+          <input type="text" id="trajetNom" placeholder="Nom de la nouvelle ligne…" autocomplete="off">
+          <button class="action-btn primary" id="btnTrajetExport"
+                  title="Enregistre le trajet comme nouvelle ligne, sélectionnable dans « Lignes ».">💾 Exporter la ligne</button>
+          <div id="trajetExportMsg" class="instructions" style="display:none;"></div>
+          <button class="action-btn danger" id="btnTrajetClear"
+                  title="Vide l'éditeur et annule la modification en cours.">Effacer le trajet</button>
+        </div>
+      </div>
+      <div id="trajetMap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Données serveur -->
+<script>
+  const SERVER_META = {
+    center: [{{ center_lat }}, {{ center_lon }}],
+    couleurs: {{ couleurs | tojson }},
+    types_relations: {{ types_relations | tojson }},
+    lignes: {{ lignes | tojson }},
+    lignes_parcours: {{ lignes_parcours | tojson }},
+  };
+</script>
+
+<script src="{{ url_for('static', filename='sync.js') }}?v=8"></script>
+<script src="{{ url_for('static', filename='carte.js') }}?v=15"></script>
+
+</body>
+</html>

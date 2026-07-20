@@ -1,0 +1,18 @@
+# Normales climatiques canadiennes 1981-2010 — Environnement et Changement climatique Canada
+# Station : Montréal/Pierre-Elliott-Trudeau Intl A (ID climat 7025250)
+# Source (licence ouverte du gouvernement du Canada) :
+#   https://climat.meteo.gc.ca/climate_normals/index_f.html
+# temp_moy_C : moyenne quotidienne ; temp_min_C / temp_max_C : minimum / maximum quotidiens moyens.
+mois,temp_moy_C,temp_min_C,temp_max_C
+1,-9.7,-14.0,-5.4
+2,-7.7,-12.2,-3.4
+3,-2.0,-6.5,2.4
+4,6.4,1.8,11.0
+5,13.4,8.4,18.4
+6,18.6,13.6,23.5
+7,21.2,16.1,26.3
+8,20.1,14.9,25.3
+9,15.5,10.7,20.2
+10,8.5,4.1,12.8
+11,2.1,-1.5,5.7
+12,-5.4,-9.3,-1.6

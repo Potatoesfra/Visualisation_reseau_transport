@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Graphe — Relations entre segments</title>
+  <script src="https://unpkg.com/cytoscape@3.29.2/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+  <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+  <script src="https://unpkg.com/cytoscape-cose-bilkent@4.1.0/cytoscape-cose-bilkent.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside id="panel">
+    <div>
+      <div class="panel-title">🕸️ Graphe abstrait</div>
+      <div class="panel-sub">
+        Nœuds = segments, arêtes = relations. Synchro avec
+        <a href="/" target="_blank" style="color:var(--accent);">la carte</a>.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Mode segments</div>
+      <div class="btn-row">
+        <button class="action-btn primary" id="btnModeNormal">Normal</button>
+        <button class="action-btn" id="btnModeFusion">Fusion</button>
+      </div>
+      <div class="instructions">« Fusion » : les segments partageant les mêmes arrêts de départ et d'arrivée (toutes lignes) sont regroupés en un seul nœud.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Mode d'affichage</div>
+      <div class="btn-row">
+        <button class="action-btn primary" id="btnModeNeighbors">Sélection + voisins</button>
+        <button class="action-btn" id="btnModeAll">Toutes les lignes filtrées</button>
+      </div>
+      <div class="instructions">
+        « Voisins » : nœuds reliés par une relation à au moins un segment sélectionné.
+        « Toutes » : graphe complet du filtre de lignes (plafonné).
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Lignes affichées (mode 'Toutes')</div>
+      <select id="lineSelect" multiple></select>
+      <div class="instructions">Vide = toutes. Le graphe est plafonné à 300 nœuds.</div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Types de relations</div>
+      <div id="relTypeCheckboxes"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Layout</div>
+      <div class="btn-row">
+        <button class="action-btn" id="btnLayoutCose">cose-bilkent</button>
+        <button class="action-btn" id="btnLayoutConcentric">concentric</button>
+        <button class="action-btn" id="btnLayoutCircle">circle</button>
+      </div>
+      <button class="action-btn" id="btnRelayout">Relancer le layout</button>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Actions</div>
+      <button class="action-btn" id="btnFreezeView">Figer la vue</button>
+      <button class="action-btn danger" id="btnClear">Effacer la sélection</button>
+      <button class="action-btn" id="btnFitGraph">Recadrer le graphe</button>
+      <button class="action-btn" id="btnOpenMap">Ouvrir la carte ⧉</button>
+      <button class="action-btn primary" id="btnGrapheCalcul">🌳 Visualiser le graphe de calcul</button>
+      <button class="action-btn" id="btnEdgeHover">🔍 Activer hover liens</button>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Statistiques</div>
+      <div class="stats-grid">
+        <div class="k">Sélectionnés</div><div class="v" id="statSel">0</div>
+        <div class="k">Nœuds affichés</div><div class="v" id="statNodes">0</div>
+        <div class="k">Arêtes affichées</div><div class="v" id="statEdges">0</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">Légende des relations</div>
+      <div id="legend"></div>
+    </div>
+  </aside>
+
+  <!-- ============ GRAPHE ============ -->
+  <div id="main-view">
+    <div id="sync-status">
+      <span class="indicator"></span>
+      <span class="label">Synchronisation active</span>
+    </div>
+
+    <div class="floating-header">
+      <div class="title">Graphe des relations</div>
+      <div class="detail">
+        Clic = sélection unique | Ctrl/Shift+clic = ajouter | Glisser = box-select
+      </div>
+    </div>
+
+    <div id="cy"></div>
+
+    <!-- Panneau d'info nœud -->
+    <div id="seg-info-panel">
+      <div class="header">
+        <div class="title" id="segInfoTitle">Nœud</div>
+        <button class="close-btn" onclick="closeSegInfo()">×</button>
+      </div>
+      <div id="segInfoBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SERVER_META = {
+    couleurs: {{ couleurs | tojson }},
+    types_relations: {{ types_relations | tojson }},
+    lignes: {{ lignes | tojson }},
+  };
+</script>
+
+<script src="{{ url_for('static', filename='sync.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='graphe.js') }}?v=9"></script>
+
+</body>
+</html>

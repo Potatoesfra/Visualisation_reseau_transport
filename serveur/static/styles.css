@@ -1,0 +1,984 @@
+/* =====================================================
+   Style partagé carte + graphe
+   Palette dark inspirée de carte_conso
+   ===================================================== */
+
+:root {
+  --bg-dark: #1a1f3a;
+  --bg-panel: #252840;
+  --bg-element: #2d3148;
+  --border: #353a60;
+  --border-light: #4a5068;
+  --text: #ffffff;
+  --text-muted: #a8b0c4;
+  --text-dim: #7a839a;
+  --accent: #4f9fff;
+  --accent-hover: #6db4ff;
+  --success: #6db86d;
+  --warning: #ffb74d;
+  --select-yellow: #ffd54f;
+  --select-yellow-glow: rgba(255, 213, 79, 0.4);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: var(--bg-dark);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* ===== Layout général : sidebar + zone principale ===== */
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+#panel {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#main-view {
+  position: relative;
+  background: var(--bg-dark);
+  overflow: hidden;
+}
+
+/* ===== Titres et sections ===== */
+
+.panel-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.panel-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.section {
+  background: var(--bg-element);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sec-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* ===== Contrôles ===== */
+
+select, input[type="text"], input[type="number"] {
+  background: var(--bg-dark);
+  color: var(--text);
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 0.83rem;
+  font-family: inherit;
+  width: 100%;
+}
+
+select[multiple] {
+  min-height: 90px;
+  padding: 4px;
+}
+
+select option { padding: 3px; }
+
+.chk-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chk-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 0;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.legend-line {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+button.ctrl-btn, button.action-btn {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  border-radius: 5px;
+  padding: 6px 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+
+button.ctrl-btn:hover, button.action-btn:hover {
+  background: var(--border);
+  border-color: var(--accent);
+}
+
+button.action-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button.action-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+button.action-btn.danger {
+  background: #4a2030;
+  border-color: #8b3a52;
+  color: #ffb4c4;
+}
+
+button.action-btn.danger:hover {
+  background: #6b2c44;
+}
+
+button.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.action-btn:disabled:hover {
+  background: var(--bg-dark);
+  border-color: var(--border-light);
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-row > button { flex: 1; }
+
+/* ===== Statistiques ===== */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+}
+
+.stats-grid .k {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.stats-grid .v {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+/* ===== Carte ===== */
+
+#map {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+/* Réécriture du style Leaflet pour le mode sombre du panneau */
+.leaflet-container { background: #e8eaf0; }
+
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.85) !important;
+  font-size: 0.7rem !important;
+}
+
+/* ===== Indicateurs flottants en haut de la zone principale ===== */
+
+.floating-header {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  background: rgba(37, 40, 64, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 0.78rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 380px;
+}
+
+.floating-header .title {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+
+.floating-header .detail {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+/* ===== Panneau info segment (bas droite carte) ===== */
+
+#seg-info-panel {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 1000;
+  background: rgba(37, 40, 64, 0.97);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.78rem;
+  max-width: 360px;
+  max-height: 45vh;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+#seg-info-panel.visible { display: block; }
+
+#seg-info-panel .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+#seg-info-panel .title {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.86rem;
+}
+
+#seg-info-panel .close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+#seg-info-panel .close-btn:hover { color: var(--text); }
+
+.seg-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  font-size: 0.76rem;
+  padding: 3px 0;
+}
+
+.seg-row .k { color: var(--text-muted); }
+.seg-row .v { color: var(--text); font-weight: 600; text-align: right; }
+
+.rel-block {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.rel-block .rel-title {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.rel-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  padding: 3px 0;
+  cursor: pointer;
+  border-radius: 3px;
+  padding-left: 4px;
+}
+
+.rel-item:hover { background: rgba(255,255,255,0.05); }
+
+.rel-item .type-tag {
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: white;
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ===== Graphe Cytoscape ===== */
+
+#cy {
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+}
+
+/* ===== Barre d'instructions du graphe ===== */
+
+.instructions {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* ===== Statut de connexion entre fenêtres ===== */
+
+#sync-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  background: rgba(37, 40, 64, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#sync-status .indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 4px var(--success);
+}
+
+#sync-status.disconnected .indicator {
+  background: var(--text-dim);
+  box-shadow: none;
+}
+
+/* ===== Scrollbar dark ===== */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-panel); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ===== Sidebar repliable ===== */
+
+/* Barre de repli en tête du panneau */
+.panel-collapse-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.collapse-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: all 0.12s ease;
+}
+.collapse-btn:hover {
+  background: var(--bg-element);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Etat replié : le panneau sort de la grille */
+body.sidebar-collapsed .app-layout {
+  grid-template-columns: 0 1fr;
+}
+
+/* Main view occupe toute la largeur quand le panneau est en overlay fixe */
+body.sidebar-collapsed #main-view {
+  grid-column: 1 / -1;
+}
+
+/* Panneau en overlay glissant quand replié */
+body.sidebar-collapsed #panel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 290px;
+  height: 100vh;
+  transform: translateX(-100%);
+  z-index: 2500;
+  box-shadow: 0 0 32px rgba(0, 0, 0, 0.6);
+  transition: transform 0.22s ease;
+  border-right: 1px solid var(--border);
+}
+
+/* Révélation au survol (classe .peek ajoutée par JS) */
+body.sidebar-collapsed.peek #panel {
+  transform: translateX(0);
+}
+
+/* Zone-bord gauche (créée par JS) */
+#sidebar-edge {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 100vh;
+  z-index: 2400;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, rgba(79,159,255,0.4), transparent);
+  transition: background 0.15s ease;
+}
+body.sidebar-collapsed #sidebar-edge {
+  display: flex;
+}
+#sidebar-edge:hover {
+  background: linear-gradient(to right, rgba(79,159,255,0.7), rgba(79,159,255,0.1));
+}
+#sidebar-edge .chev {
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  text-shadow: 0 0 6px rgba(79,159,255,0.8);
+}
+
+/* Décaler le statut de sync pour ne pas être masqué par la zone bord */
+body.sidebar-collapsed #sync-status {
+  left: 26px;
+}
+
+/* Tooltip arêtes (généré en JS) */
+.edge-tooltip {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  background: rgba(37, 40, 64, 0.97);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.74rem;
+  color: var(--text);
+  max-width: 260px;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  line-height: 1.6;
+}
+
+/* ===== Page Consommation ===== */
+#consoChart {
+  position: absolute;
+  inset: 70px 16px 16px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.conso-empty {
+  position: absolute;
+  top: 50%; left: 55%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.mois-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px 8px;
+}
+.mois-grid label { font-size: 0.78rem; }
+.temp-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.temp-row label {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== Outil de création de trajet (overlay plein écran) ===== */
+#trajet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(10, 12, 24, 0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#trajet-overlay.visible { display: flex; }
+
+.trajet-modal {
+  width: 93vw;
+  height: 90vh;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 48px rgba(0, 0, 0, 0.65);
+}
+
+.trajet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-element);
+}
+.trajet-header .title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.trajet-header .close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.trajet-header .close-btn:hover { color: var(--text); }
+
+.trajet-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.trajet-panel {
+  width: 320px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+.trajet-panel input[type="text"] {
+  background: var(--bg-element);
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  color: var(--text);
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+#trajetMap {
+  flex: 1;
+  min-width: 0;
+  cursor: crosshair;
+}
+
+/* Liste des jalons */
+.jalons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+.jalon-item {
+  background: var(--bg-element);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 0.76rem;
+}
+.jalon-item .jalon-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.jalon-item .jalon-nom {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jalon-item .jalon-nom .num {
+  color: var(--select-yellow);
+  font-weight: 700;
+}
+.jalon-item button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 2px 5px;
+  line-height: 1.2;
+}
+.jalon-item button:hover { color: var(--text); border-color: var(--accent); }
+.jalon-item button:disabled { opacity: 0.35; cursor: default; }
+
+/* Suggestions d'arrêts proches d'un jalon */
+.jalon-suggestions {
+  margin-top: 5px;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.suggestion-item {
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+}
+.suggestion-item:hover {
+  background: var(--bg-panel);
+  color: var(--text);
+}
+.suggestion-item .dist {
+  color: var(--text-dim);
+  float: right;
+}
+
+/* Lecture de la simulation */
+.play-time {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+/* Icône bus animée (lecture de la simulation) */
+.bus-icon {
+  font-size: 22px;
+  line-height: 22px;
+  text-align: center;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+}
+
+/* Bannière de tracé de voyage sur la carte */
+#voyage-trace-banner {
+  position: absolute;
+  top: 52px;
+  right: 12px;
+  z-index: 1001;
+  background: rgba(171, 71, 188, 0.92);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#voyage-trace-banner button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+#voyage-trace-banner button:hover { background: rgba(255, 255, 255, 0.35); }
+
+/* =====================================================
+   Choices.js — surcouche dark (sélecteurs Lignes / Parcours)
+   ===================================================== */
+.choices { margin-bottom: 0; }
+.choices__inner {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  color: var(--text);
+  min-height: 34px;
+  padding: 4px 6px 2px;
+  font-size: 0.83rem;
+}
+.choices.is-focused .choices__inner { border-color: var(--accent); }
+.choices__list--dropdown,
+.choices__list[aria-expanded] {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.choices__list--dropdown .choices__item { color: var(--text); font-size: 0.82rem; }
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+  background: var(--bg-element);
+}
+.choices__list--dropdown .choices__group .choices__heading {
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.choices__input {
+  background: transparent;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+/* Chips sélectionnées */
+.choices__list--multiple .choices__item {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.78rem;
+  padding: 2px 7px;
+}
+.choices__list--multiple .choices__item[data-value^="perso:"] {
+  background: #ff7043;
+  border-color: #ff7043;
+}
+.choices[data-type*="select-multiple"] .choices__button {
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+  margin: 0 -2px 0 8px;
+  opacity: 0.85;
+}
+.choices[data-type*="select-multiple"] .choices__button:hover { opacity: 1; }
+.choices__placeholder { color: var(--text-dim); opacity: 1; }
+
+/* =====================================================
+   Gestion des lignes créées (outil de trajet)
+   ===================================================== */
+.perso-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 24vh;
+  overflow-y: auto;
+}
+.perso-item {
+  background: var(--bg-element);
+  border: 1px solid var(--border);
+  border-left: 3px solid #ff7043;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.76rem;
+}
+.perso-item.is-editing { border-color: var(--select-yellow); box-shadow: 0 0 0 1px var(--select-yellow-glow); }
+.perso-item .perso-row { display: flex; align-items: center; gap: 6px; }
+.perso-item .perso-nom {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-weight: 600;
+}
+.perso-item .perso-stats { color: var(--text-dim); font-size: 0.7rem; margin-top: 2px; }
+.perso-item button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  line-height: 1.2;
+}
+.perso-item button:hover { color: var(--text); border-color: var(--accent); }
+.perso-item button.danger:hover { color: #fff; border-color: #e05252; background: #b23b3b; }
+
+/* Bouton « garder le point libre » sous un jalon */
+.jalon-suggestions .suggestion-cancel {
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 4px;
+  color: var(--warning);
+  font-size: 0.73rem;
+  font-style: italic;
+}
+.jalon-suggestions .suggestion-cancel:hover { background: var(--bg-panel); color: var(--text); }
+
+/* Marqueur d'arrêt candidat (survol sur la carte de l'outil) */
+.stop-candidate-icon {
+  font-size: 20px;
+  line-height: 20px;
+  text-align: center;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+  cursor: pointer;
+}
+
+/* Résumé du trajet : compact et à hauteur bornée pour ne pas masquer la
+   liste des jalons ni les arrêts proches. */
+.trajet-resume {
+  background: var(--bg-element);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.73rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  max-height: 22vh;
+  overflow-y: auto;
+}
+.trajet-resume b { color: var(--text); }
+
+/* Menu contextuel « Déplacer ce tronçon » (clic droit sur un tronçon) */
+.reroute-menu {
+  position: fixed;
+  z-index: 4000;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.reroute-menu button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.reroute-menu button:hover { background: var(--accent); color: #fff; }
+
+/* Poignée de re-routage (glisser sur une autre voie) */
+.reroute-handle {
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  color: #fff;
+  background: var(--accent);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  cursor: grab;
+}
+
+/* Panneau de l'outil : zone défilante (haut) + pied de page épinglé (bas).
+   Le pied garde toujours visibles « Exporter » et « Effacer le trajet ». */
+.trajet-panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.trajet-panel-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* Sections repliables (Lignes créées / Jalons / Paramètres) */
+.fold-section { display: flex; flex-direction: column; gap: 6px; }
+.fold-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 2px 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.fold-header:hover { color: var(--text); }
+.fold-caret {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+.fold-section.collapsed .fold-caret { transform: rotate(-90deg); }
+.fold-section.collapsed .fold-body { display: none; }
+
+/* Poignée de point de tracé « via » (dévie l'itinéraire sans créer d'arrêt) */
+.via-handle {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  cursor: grab;
+  box-sizing: border-box;
+}
+
+/* Caractéristiques physiques du segment sélectionné (sidebar Statistiques) */
+.stat-seg-info {
+  margin-top: 10px;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.stat-seg-info .rel-block:first-child { margin-top: 0; }
