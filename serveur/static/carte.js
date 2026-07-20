@@ -121,6 +121,10 @@ function updateModeButtonsUI() {
   const bF = document.getElementById("btnModeFusion");
   if (!bN || !bF) return;
   const fusionOk = !!(DataLoader.meta && DataLoader.meta.fusion_disponible);
+  // Sans mode fusion (déploiement allégé ou fichiers absents), le sélecteur
+  // Normal/Fusion n'a plus d'objet : on masque toute la section.
+  const sec = document.getElementById("secModeSegments");
+  if (sec) sec.style.display = fusionOk ? "" : "none";
   bF.disabled = !fusionOk;
   bF.title = fusionOk ? "" : "Fichiers de fusion absents — lancez Fusion_segments.py puis Relations_segments.py en mode fusion.";
   bN.classList.toggle("primary", DataLoader.mode === "normal");
@@ -854,6 +858,14 @@ function updateExtrasAvailability() {
            "Réseau routier absent — lancez pipeline/p08_graphe_routier.py");
   setDispo("btnOuvrirTrajet", !!meta.trajet_disponible,
            "Graphe routier absent — lancez pipeline/p08_graphe_routier.py");
+  // Pages Consommation / Simulation : masquées si leurs données ne sont pas
+  // chargées (déploiement allégé VIZ_LIGHT ou parquet conso absent).
+  const hideIf = (id, absent) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = absent ? "none" : "";
+  };
+  hideIf("btnOpenConso", !meta.conso_disponible);
+  hideIf("btnOpenSimulation", !meta.simulation_disponible);
 }
 
 // ===== Relief =====

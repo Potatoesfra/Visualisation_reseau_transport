@@ -20,7 +20,7 @@ chaussée) et énergétiques (modèle physique *road-load* d'un bus).
 
 | Page | URL | Contenu |
 |---|---|---|
-| Carte | `/` | Carte Leaflet : segments, relations, arrêts, overlay relief, couches géobase, **outil de création de trajet** (routage sur le réseau routier réel + estimation d'énergie) |
+| Carte | `/` | Carte Leaflet : segments, relations, arrêts, overlay relief, **réseau routier routable**, **outil de création de trajet** (routage sur le réseau routier réel + estimation d'énergie) |
 | Graphe | `/graphe` | Graphe abstrait Cytoscape : nœuds = segments, arêtes = relations typées |
 | Graphe de calcul | `/graphe_calcul` | Arbre de voisinage avec moteur physique |
 | Consommation | `/consommation` | Profils de consommation simulée par segment (Plotly) : par voyage, par mois ou par plage de température |
@@ -29,6 +29,13 @@ chaussée) et énergétiques (modèle physique *road-load* d'un bus).
 Les pages ouvertes dans plusieurs onglets/fenêtres se **synchronisent**
 automatiquement (BroadcastChannel) : sélectionner un segment sur une page le
 surligne sur les autres.
+
+> **Mode allégé (`VIZ_LIGHT=1`)** — pour l'hébergement à faible RAM (voir
+> [Déploiement](#déploiement)), le serveur peut sauter au démarrage le **mode
+> fusion**, la **Consommation** et la **Simulation** (qui dépend de la conso).
+> Seules les pages Carte, Graphe et Graphe de calcul restent actives ; les
+> contrôles correspondants sont masqués. En local (variable non définie), tout
+> reste chargé.
 
 ### Outil de création de trajet
 
@@ -91,10 +98,32 @@ python serveur/serveur_viz.py
 # puis ouvrir http://127.0.0.1:5000/
 ```
 
-Hôte/port configurables par variables d'environnement `VIZ_HOTE` / `VIZ_PORT`.
+L'overlay « réseau routier routable » de la carte est dérivé du graphe de
+routage (`data_derivee/`, versionné) : il ne dépend d'aucune donnée brute et
+fonctionne dès le clone.
 
-Sans `data_brute/`, seules les couches géobase de la carte sont désactivées
-(les cases correspondantes sont grisées) — tout le reste fonctionne.
+## Déploiement
+
+Le serveur lit ses variables d'environnement via `config.py` :
+
+| Variable | Rôle | Défaut |
+|---|---|---|
+| `VIZ_HOTE` / `VIZ_PORT` | hôte / port d'écoute | `127.0.0.1` / `5000` |
+| `PORT` | port imposé par un PaaS (Render, Heroku…) : bascule automatiquement l'écoute sur `0.0.0.0:$PORT` | — |
+| `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation) → RSS ≈ 440 Mo, tient sur une instance 512 Mo | non défini |
+
+Un blueprint **Render** (`render.yaml`) et un **`Procfile`** sont fournis.
+La commande de production utilise gunicorn (ajouté à `requirements.txt`) :
+
+```bash
+gunicorn --chdir serveur serveur_viz:app --workers 1 --preload --timeout 300 --bind 0.0.0.0:$PORT
+```
+
+- `render.yaml` déploie en plan **gratuit** avec `VIZ_LIGHT=1` (les pages
+  Consommation/Simulation et le mode fusion sont désactivés en ligne). Pour tout
+  activer, retirer `VIZ_LIGHT` et passer en plan **standard** (≥ 2 Go de RAM).
+- Le serveur est en **lecture seule** ; les lignes créées sont stockées dans le
+  `localStorage` du navigateur — le disque éphémère d'un PaaS convient.
 
 ## Régénérer les dérivés depuis les sources brutes
 
@@ -142,7 +171,8 @@ et formules partagées par le pipeline, la simulation et le trajet cliqué) :
 ## Structure du dépôt
 
 ```
-config.py                  chemins + hôte/port
+config.py                  chemins + hôte/port + drapeau VIZ_LIGHT
+render.yaml, Procfile      déploiement PaaS (Render / gunicorn)
 scripts/                   téléchargement des données brutes
 pipeline/p01..p08          étapes de production des dérivés (voir ci-dessus)
 serveur/serveur_viz.py     serveur Flask (pages + API JSON)
@@ -155,10 +185,14 @@ data_derivee/              dérivés versionnés (l'app marche dès le clone)
 ## API principale
 
 `/api/segments`, `/api/relations`, `/api/stops`, `/api/liaison`, `/api/meta`
-(paramètre `?mode=normal|fusion`) ; `/api/conso/{options,voyages,profil}` ;
-`/api/simulation/voyage?voyage=ID` ;
+(paramètre `?mode=normal|fusion` ; `fusion` indisponible en mode allégé) ;
 `/api/trajet/estimation?points=lat,lon;lat,lon&charge=20&mois=1` ;
-`/api/relief`.
+`/api/reseau_routier` (réseau routable en polylignes, dérivé du graphe) ;
+`/api/relief`. Selon les données chargées :
+`/api/conso/{options,voyages,profil}` et `/api/simulation/voyage?voyage=ID`
+(absents en mode allégé `VIZ_LIGHT`). Le drapeau de chaque fonctionnalité est
+exposé par `/api/meta` (`fusion_disponible`, `conso_disponible`,
+`simulation_disponible`, `trajet_disponible`, `relief_disponible`).
 
 ## Sources et licences des données
 

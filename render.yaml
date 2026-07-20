@@ -2,23 +2,24 @@
 # Déploiement du serveur de visualisation du réseau STM.
 #
 # Notes :
-#  - Le serveur charge en mémoire graphe routier + segments + conso synthétique :
-#    prévoir >= 512 Mo. Le plan gratuit (512 Mo) risque l'OOM au démarrage → le
-#    plan « standard » (2 Go) est recommandé ; « starter » (512 Mo) peut suffire
-#    mais reste juste.
+#  - VIZ_LIGHT=1 : mode allégé (saute fusion + conso + simulation) → RSS ~440 Mo,
+#    ce qui tient sur le plan GRATUIT (512 Mo). Retire cette variable et passe en
+#    plan « standard » (2 Go) pour activer toutes les pages en ligne.
 #  - --preload : les données sont chargées une seule fois par le maître gunicorn
 #    (le worker n'est donc pas tué par le timeout pendant le chargement).
-#  - --workers 1 : un seul worker pour ne pas dupliquer ~0,5 Go de données.
+#  - --workers 1 : un seul worker pour ne pas dupliquer les données en RAM.
 #  - Le serveur est en LECTURE SEULE : le disque éphémère de Render convient
 #    (les lignes créées sont stockées côté navigateur, en localStorage).
 services:
   - type: web
     name: reseau-stm-viz
     runtime: python
-    plan: standard
+    plan: free
     autoDeploy: true
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --chdir serveur serveur_viz:app --workers 1 --preload --timeout 300 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
+      - key: VIZ_LIGHT
+        value: "1"

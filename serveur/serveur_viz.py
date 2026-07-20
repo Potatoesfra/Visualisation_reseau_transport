@@ -40,7 +40,7 @@ from shapely.geometry import Point
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from config import DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT  # noqa: E402
+from config import DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT, VIZ_LIGHT  # noqa: E402
 from modele_physique import profil_cinematique, GrapheRoutier  # noqa: E402
 
 
@@ -346,9 +346,9 @@ print("Jeu normal...")
 DATASETS = {"normal": build_dataset(PATH_SEGMENTS, PATH_RELATIONS, PATH_CENTRALITE,
                                     path_attributs=PATH_ATTRIBUTS)}
 
-# --- Jeu fusion (si les fichiers existent) ---
+# --- Jeu fusion (si les fichiers existent et hors mode allégé) ---
 LIAISON_PAYLOAD = {}
-_fusion_dispo = all(p.exists() for p in (
+_fusion_dispo = (not VIZ_LIGHT) and all(p.exists() for p in (
     PATH_SEGMENTS_FUSION, PATH_RELATIONS_FUSION, PATH_LIAISON_FUSION))
 if _fusion_dispo:
     print("Jeu fusion...")
@@ -379,6 +379,8 @@ if _fusion_dispo:
         parcours_by_seg=parcours_by_merged,
     )
     print(f"  Liaison : {len(LIAISON_PAYLOAD)} nœuds fusionnés.")
+elif VIZ_LIGHT:
+    print("  (mode allégé VIZ_LIGHT — jeu fusion non chargé)")
 else:
     print("  (jeu fusion absent — bouton Fusion désactivé)")
 
@@ -544,7 +546,9 @@ def _safe(v, digits=1):
     return round(f, digits)
 
 
-if PATH_CONSO.exists():
+if VIZ_LIGHT:
+    print("  (mode allégé VIZ_LIGHT — consommation/simulation non chargées)")
+elif PATH_CONSO.exists():
     print("Consommation synthétique (modèle physique)...")
     _lc = pd.read_parquet(PATH_CONSO)
     _lc["segment_id"]    = _lc["segment_id"].astype(int)

@@ -672,6 +672,8 @@ function updateModeButtonsUI() {
   const bF = document.getElementById("btnModeFusion");
   if (!bN || !bF) return;
   const fusionOk = !!(DataLoader.meta && DataLoader.meta.fusion_disponible);
+  const sec = document.getElementById("secModeSegments");
+  if (sec) sec.style.display = fusionOk ? "" : "none";
   bF.disabled = !fusionOk;
   bF.title = fusionOk ? "" : "Fichiers de fusion absents — lancez Fusion_segments.py puis Relations_segments.py en mode fusion.";
   bN.classList.toggle("primary", DataLoader.mode === "normal");

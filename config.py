@@ -29,3 +29,9 @@ GTFS_DIR = DATA_BRUTE / "gtfs_stm"
 _PORT_PAAS = os.environ.get("PORT")   # défini par l'hébergeur (Render, Heroku…)
 HOTE = os.environ.get("VIZ_HOTE", "0.0.0.0" if _PORT_PAAS else "127.0.0.1")
 PORT = int(os.environ.get("VIZ_PORT", _PORT_PAAS or "5000"))
+
+# Mode allégé (hébergement à faible RAM, ex. Render gratuit 512 Mo) : saute au
+# démarrage le chargement du mode FUSION et de la CONSOMMATION synthétique (donc
+# aussi la SIMULATION, qui en dépend). Le serveur tombe alors sous ~450 Mo. Non
+# défini en local → toutes les fonctionnalités restent chargées.
+VIZ_LIGHT = os.environ.get("VIZ_LIGHT", "0").strip().lower() not in ("", "0", "false", "no", "off")
