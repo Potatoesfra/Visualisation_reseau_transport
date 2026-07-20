@@ -30,6 +30,8 @@ Lancement :
 # %% =============================================================
 # IMPORTS
 # ===============================================================
+import gc
+import json
 import sys
 from pathlib import Path
 
@@ -690,6 +692,40 @@ if CONSO_DISPONIBLE and PATH_ATTRIBUTS.exists():
 
 
 # %% =============================================================
+# COMPACTION MÉMOIRE — payloads figés en JSON
+# ===============================================================
+# Les payloads segments/relations/arrêts sont immuables après le démarrage.
+# Les garder en objets Python (des millions de petits dicts/listes/floats)
+# coûte plusieurs centaines de Mo de RSS ; on les sérialise une seule fois en
+# JSON compact puis on libère les objets. Les routes /api/* renvoient la chaîne
+# telle quelle (aucune re-sérialisation par requête). Indispensable pour tenir
+# sur une instance à 512 Mo.
+def _np_item(o):
+    if hasattr(o, "item"):        # scalaires numpy (int64, float64…)
+        return o.item()
+    raise TypeError(f"Type non sérialisable en JSON : {type(o)!r}")
+
+
+def _fige_json(obj):
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":"),
+                      default=_np_item)
+
+
+for _ds in DATASETS.values():
+    _ds["n_segments"]     = len(_ds["segments"])
+    _ds["n_relations"]    = len(_ds["relations"])
+    _ds["segments_json"]  = _fige_json(_ds["segments"])
+    _ds["relations_json"] = _fige_json(_ds["relations"])
+    _ds["segments"] = _ds["relations"] = None
+    _ds.pop("codes_utiles", None)
+
+N_STOPS = len(STOPS_PAYLOAD)
+STOPS_JSON = _fige_json(STOPS_PAYLOAD)
+STOPS_PAYLOAD = None
+gc.collect()
+
+
+# %% =============================================================
 # GRAPHE ROUTIER — trajet tracé sur la carte (p08)
 # ===============================================================
 GRAPHE_ROUTIER = None
@@ -1019,7 +1055,7 @@ def relief_fichier(fichier):
     return send_from_directory(DIR_RELIEF, fichier)
 
 
-_RESEAU_ROUTIER_CACHE = None   # polylignes du réseau routable, construites 1×
+_RESEAU_ROUTIER_CACHE = None   # chaîne JSON du réseau routable, construite 1×
 
 
 @app.route("/api/reseau_routier")
@@ -1027,13 +1063,13 @@ def api_reseau_routier():
     """Réseau routier ROUTABLE = arêtes du graphe p08 (exactement le réseau sur
     lequel les trajets sont tracés), renvoyé en polylignes [lat, lon]. Léger et
     versionné (contrairement à la géobase brute de 43 Mo). Les arêtes aller/retour
-    (même paire de nœuds) ne sont tracées qu'une fois. Résultat mis en cache."""
+    (même paire de nœuds) ne sont tracées qu'une fois. Le résultat est mis en
+    cache directement en JSON (une chaîne pèse ~5× moins que les listes Python)."""
     global _RESEAU_ROUTIER_CACHE
     if not TRAJET_DISPONIBLE:
         return jsonify({"error": "Graphe routier indisponible "
                                  "(lancer pipeline/p08_graphe_routier.py)."}), 404
     if _RESEAU_ROUTIER_CACHE is None:
-        import json as _json
         aretes = GRAPHE_ROUTIER.aretes
         na = aretes["node_a"].to_list()
         nb = aretes["node_b"].to_list()
@@ -1048,26 +1084,31 @@ def api_reseau_routier():
             vus.add(cle)
             pts = coords_col[i]
             if isinstance(pts, str):
-                pts = _json.loads(pts)
+                pts = json.loads(pts)
             lignes.append([[float(p[0]), float(p[1])] for p in pts])
-        _RESEAU_ROUTIER_CACHE = lignes
-    return jsonify({"lignes": _RESEAU_ROUTIER_CACHE})
+        _RESEAU_ROUTIER_CACHE = json.dumps({"lignes": lignes},
+                                           separators=(",", ":"))
+    return app.response_class(_RESEAU_ROUTIER_CACHE, mimetype="application/json")
 
 
 # --- API génériques ----------------------------------------------------
+# Les gros payloads sont pré-sérialisés au démarrage (cf. COMPACTION MÉMOIRE) :
+# on renvoie la chaîne JSON telle quelle.
 @app.route("/api/segments")
 def api_segments():
-    return jsonify(_dataset(request.args.get("mode", "normal"))["segments"])
+    ds = _dataset(request.args.get("mode", "normal"))
+    return app.response_class(ds["segments_json"], mimetype="application/json")
 
 
 @app.route("/api/relations")
 def api_relations():
-    return jsonify(_dataset(request.args.get("mode", "normal"))["relations"])
+    ds = _dataset(request.args.get("mode", "normal"))
+    return app.response_class(ds["relations_json"], mimetype="application/json")
 
 
 @app.route("/api/stops")
 def api_stops():
-    return jsonify(STOPS_PAYLOAD)
+    return app.response_class(STOPS_JSON, mimetype="application/json")
 
 
 @app.route("/api/liaison")
@@ -1095,9 +1136,9 @@ def api_meta():
         "simulation_disponible": SIMULATION_DISPONIBLE,
         "trajet_disponible": TRAJET_DISPONIBLE,
         "relief_disponible": RELIEF_DISPONIBLE,
-        "n_segments": len(ds["segments"]),
-        "n_relations": len(ds["relations"]),
-        "n_stops": len(STOPS_PAYLOAD),
+        "n_segments": ds["n_segments"],
+        "n_relations": ds["n_relations"],
+        "n_stops": N_STOPS,
     })
 
 

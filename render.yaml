@@ -2,12 +2,15 @@
 # Déploiement du serveur de visualisation du réseau STM.
 #
 # Notes :
-#  - VIZ_LIGHT=1 : mode allégé (saute fusion + conso + simulation) → RSS ~440 Mo,
-#    ce qui tient sur le plan GRATUIT (512 Mo). Retire cette variable et passe en
-#    plan « standard » (2 Go) pour activer toutes les pages en ligne.
-#  - --preload : les données sont chargées une seule fois par le maître gunicorn
-#    (le worker n'est donc pas tué par le timeout pendant le chargement).
+#  - VIZ_LIGHT=1 : mode allégé (saute fusion + conso + simulation), les payloads
+#    sont figés en JSON au démarrage → tient sur le plan GRATUIT (512 Mo).
+#    Retire cette variable et passe en plan « standard » (2 Go) pour activer
+#    toutes les pages en ligne.
+#  - PAS de --preload : sous Linux, le fork gunicorn + refcounting Python
+#    détruit le copy-on-write et duplique les données maître/worker → OOM.
+#    Sans preload, le maître reste minuscule et seul le worker porte les données.
 #  - --workers 1 : un seul worker pour ne pas dupliquer les données en RAM.
+#  - --timeout 300 : laisse au worker le temps de charger les données au boot.
 #  - Le serveur est en LECTURE SEULE : le disque éphémère de Render convient
 #    (les lignes créées sont stockées côté navigateur, en localStorage).
 services:
@@ -17,7 +20,7 @@ services:
     plan: free
     autoDeploy: true
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --chdir serveur serveur_viz:app --workers 1 --preload --timeout 300 --bind 0.0.0.0:$PORT
+    startCommand: gunicorn --chdir serveur serveur_viz:app --workers 1 --timeout 300 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"

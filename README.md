@@ -110,13 +110,20 @@ Le serveur lit ses variables d'environnement via `config.py` :
 |---|---|---|
 | `VIZ_HOTE` / `VIZ_PORT` | hôte / port d'écoute | `127.0.0.1` / `5000` |
 | `PORT` | port imposé par un PaaS (Render, Heroku…) : bascule automatiquement l'écoute sur `0.0.0.0:$PORT` | — |
-| `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation) → RSS ≈ 440 Mo, tient sur une instance 512 Mo | non défini |
+| `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation) → RSS ≈ 220 Mo, tient sur une instance 512 Mo | non défini |
+
+Au démarrage, les gros payloads (segments, relations, arrêts) sont **sérialisés
+une seule fois en JSON compact** puis les objets Python sont libérés : le RSS
+chute fortement et les routes `/api/*` servent la chaîne telle quelle.
 
 Un blueprint **Render** (`render.yaml`) et un **`Procfile`** sont fournis.
-La commande de production utilise gunicorn (ajouté à `requirements.txt`) :
+La commande de production utilise gunicorn (ajouté à `requirements.txt`),
+**sans `--preload`** : sous Linux, le fork gunicorn combiné au refcounting
+Python casse le copy-on-write et duplique les données maître/worker (→ OOM) ;
+sans preload, seul le worker porte les données.
 
 ```bash
-gunicorn --chdir serveur serveur_viz:app --workers 1 --preload --timeout 300 --bind 0.0.0.0:$PORT
+gunicorn --chdir serveur serveur_viz:app --workers 1 --timeout 300 --bind 0.0.0.0:$PORT
 ```
 
 - `render.yaml` déploie en plan **gratuit** avec `VIZ_LIGHT=1` (les pages
