@@ -32,10 +32,11 @@ surligne sur les autres.
 
 > **Mode allégé (`VIZ_LIGHT=1`)** — pour l'hébergement à faible RAM (voir
 > [Déploiement](#déploiement)), le serveur saute au démarrage le **mode
-> fusion**, la **Consommation** et la **Simulation** (qui dépend de la conso),
-> et désactive les pages **Graphe** et **Graphe de calcul** (purement côté
-> client, retirées pour épurer l'UI en ligne). Seule la page Carte reste
-> active ; les contrôles correspondants sont masqués. En local (variable non
+> fusion**, la **Consommation** et la **Simulation** (qui dépend de la conso) :
+> ces pages nécessitent des données volumineuses non incluses dans les
+> payloads statiques. Les pages **Carte**, **Graphe** et **Graphe de calcul**
+> restent actives (purement côté client, aucun coût RAM serveur). Les
+> contrôles des fonctionnalités absentes sont masqués. En local (variable non
 > définie), tout reste chargé.
 
 ### Outil de création de trajet
@@ -124,13 +125,19 @@ python scripts/exporter_payloads_statiques.py
 ```
 
 Ceci écrit `data_derivee/payloads_statiques/*.json.gz` (~6,5 Mo au total,
-compressés ~5×). Tant que `VIZ_LIGHT=1` **et** que ce dossier existe, le
-serveur les sert tels quels au démarrage : **`geopandas`/`shapely` ne sont
-jamais importés**, il n'y a plus aucune reconstruction ni pic de RAM au boot.
+compressés ~5× — uniquement pour alléger le dépôt Git, pas pour le réseau).
+Tant que `VIZ_LIGHT=1` **et** que ce dossier existe, le serveur les
+**décompresse une seule fois au démarrage** en chaînes JSON tenues en mémoire,
+puis les sert telles quelles (même mécanisme que la compaction du mode
+dynamique) : **`geopandas`/`shapely` ne sont jamais importés**, il n'y a plus
+aucune reconstruction ni pic de RAM au boot. Les routes `/api/*` renvoient du
+JSON brut, sans `Content-Encoding` manuel — poser cet en-tête à la main sur un
+fichier pré-compressé est fragile derrière un proxy PaaS (risque de double
+compression ou de décodage cassé côté navigateur, déjà rencontré sur Render).
 Seul le graphe routier (p08, pour le routage Dijkstra des trajets créés) reste
 chargé en mémoire — c'est la seule chose encore « calculée » en ligne.
 
-RSS mesuré (VIZ_LIGHT + payloads statiques) : **~140 Mo au démarrage, ~280 Mo
+RSS mesuré (VIZ_LIGHT + payloads statiques) : **~180 Mo au démarrage, ~315 Mo
 au pic** (après une estimation de trajet) — large marge sur une instance
 512 Mo Render, contre 740 Mo en mode complet sans aucune optimisation.
 
@@ -150,10 +157,11 @@ gunicorn --chdir serveur serveur_viz:app --workers 1 --timeout 300 --bind 0.0.0.
 ```
 
 - `render.yaml` déploie en plan **gratuit** avec `VIZ_LIGHT=1` (les pages
-  Consommation/Simulation, Graphe/Graphe de calcul et le mode fusion sont
-  désactivés en ligne). Pour tout activer, retirer `VIZ_LIGHT` et passer en
-  plan **standard** (≥ 2 Go de RAM) — le serveur reconstruit alors tout
-  dynamiquement depuis `data_derivee/` au démarrage (mode d'origine).
+  Consommation/Simulation et le mode fusion sont désactivés en ligne ; Carte,
+  Graphe et Graphe de calcul restent actifs). Pour tout activer, retirer
+  `VIZ_LIGHT` et passer en plan **standard** (≥ 2 Go de RAM) — le serveur
+  reconstruit alors tout dynamiquement depuis `data_derivee/` au démarrage
+  (mode d'origine).
 - Le serveur est en **lecture seule** ; les lignes créées sont stockées dans le
   `localStorage` du navigateur — le disque éphémère d'un PaaS convient.
 

@@ -31,6 +31,7 @@ Lancement :
 # IMPORTS
 # ===============================================================
 import gc
+import gzip
 import json
 import os
 import sys
@@ -38,8 +39,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from flask import (Flask, render_template, jsonify, request,
-                   send_file, send_from_directory)
+from flask import Flask, render_template, jsonify, request, send_from_directory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from config import DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT, VIZ_LIGHT  # noqa: E402
@@ -376,19 +376,29 @@ def build_dataset(path_segments, path_relations, path_centralite,
 # ===============================================================
 print("=== Chargement des données ===")
 
+def _lire_gz_texte(path):
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        return f.read()
+
+
 if MODE_STATIQUE:
     print("Mode statique : payloads pré-calculés servis tels quels "
           "(régénération : scripts/exporter_payloads_statiques.py)")
     with open(PATH_PL_META, "r", encoding="utf-8") as f:
         _meta_stat = json.load(f)
+    # Décompressés UNE FOIS ici et servis tels quels par /api/* (même mécanisme
+    # que la compaction JSON du mode dynamique, cf. plus bas) : on évite de
+    # renvoyer un Content-Encoding: gzip manuel, fragile derrière un proxy PaaS
+    # (risque de double compression / décodage cassé côté navigateur, constaté
+    # sur Render — cause du hover/clic segments non fonctionnel).
     DATASETS = {"normal": {
-        "lignes":       _meta_stat["lignes"],
-        "types":        _meta_stat["types_relations"],
-        "center":       _meta_stat["center"],
-        "n_segments":   int(_meta_stat["n_segments"]),
-        "n_relations":  int(_meta_stat["n_relations"]),
-        "segments_gz":  PATH_PL_SEGMENTS,
-        "relations_gz": PATH_PL_RELATIONS,
+        "lignes":        _meta_stat["lignes"],
+        "types":         _meta_stat["types_relations"],
+        "center":        _meta_stat["center"],
+        "n_segments":    int(_meta_stat["n_segments"]),
+        "n_relations":   int(_meta_stat["n_relations"]),
+        "segments_json":  _lire_gz_texte(PATH_PL_SEGMENTS),
+        "relations_json": _lire_gz_texte(PATH_PL_RELATIONS),
     }}
     print(f"    {DATASETS['normal']['n_segments']} seg | "
           f"{DATASETS['normal']['n_relations']} rel (pré-calculés)")
@@ -771,7 +781,10 @@ def _fige_json(obj):
 
 
 if MODE_STATIQUE:
-    STOPS_JSON = None               # tout est servi depuis les .json.gz
+    STOPS_JSON = _lire_gz_texte(PATH_PL_STOPS)
+    # Réseau routier : pré-décompressé ici aussi (même raison : pas de
+    # Content-Encoding manuel), servi tel quel par /api/reseau_routier.
+    _RESEAU_ROUTIER_CACHE = _lire_gz_texte(PATH_PL_RESEAU)
 else:
     for _ds in DATASETS.values():
         _ds["n_segments"]     = len(_ds["segments"])
@@ -783,6 +796,7 @@ else:
 
     STOPS_JSON = _fige_json(STOPS_PAYLOAD)
     STOPS_PAYLOAD = None
+    _RESEAU_ROUTIER_CACHE = None   # construit à la demande, cf. /api/reseau_routier
     gc.collect()
 
 
@@ -809,10 +823,10 @@ if PATH_NORMALES.exists():
 RELIEF_DISPONIBLE = PATH_RELIEF_PNG.exists() and PATH_RELIEF_BOUNDS.exists()
 
 # Pages Graphe / Graphe de calcul : purement côté client (Cytoscape sur les
-# mêmes payloads /api/segments + /api/relations que la carte). Désactivées en
-# mode allégé pour épurer l'UI en ligne — aucune donnée serveur ne leur est
-# propre, donc aucun gain RAM à les retirer.
-GRAPHE_DISPONIBLE = not VIZ_LIGHT
+# mêmes payloads /api/segments + /api/relations que la carte, déjà servis
+# statiquement en VIZ_LIGHT). Toujours disponibles : aucune donnée ni calcul
+# serveur qui leur soit propre.
+GRAPHE_DISPONIBLE = True
 
 
 # %% =============================================================
@@ -1126,15 +1140,6 @@ def relief_fichier(fichier):
     return send_from_directory(DIR_RELIEF, fichier)
 
 
-def _reponse_payload_gz(path):
-    """Sert un payload .json.gz pré-compressé tel quel (Content-Encoding: gzip) :
-    aucune donnée en RAM, et ~5× moins de bande passante qu'en JSON brut."""
-    resp = send_file(path, mimetype="application/json", conditional=True)
-    resp.headers["Content-Encoding"] = "gzip"
-    resp.headers["Vary"] = "Accept-Encoding"
-    return resp
-
-
 def _construire_reseau_routier_json():
     """Chaîne JSON {"lignes": [...]} du réseau routable : arêtes du graphe p08
     en polylignes [lat, lon], dédupliquées par paire de nœuds (aller/retour)."""
@@ -1157,48 +1162,39 @@ def _construire_reseau_routier_json():
     return json.dumps({"lignes": lignes}, separators=(",", ":"))
 
 
-_RESEAU_ROUTIER_CACHE = None   # chaîne JSON du réseau routable, construite 1×
-
-
 @app.route("/api/reseau_routier")
 def api_reseau_routier():
     """Réseau routier ROUTABLE = exactement le réseau sur lequel les trajets
-    sont tracés. En mode statique : fichier pré-calculé ; sinon construit 1×
-    et mis en cache en chaîne JSON (~5× plus léger que les listes Python)."""
+    sont tracés. En mode statique : pré-décompressé au démarrage ; sinon
+    construit 1× à la demande et mis en cache (chaîne JSON, servie telle
+    quelle — jamais de Content-Encoding manuel, fragile derrière un proxy PaaS)."""
     global _RESEAU_ROUTIER_CACHE
-    if MODE_STATIQUE:
-        return _reponse_payload_gz(PATH_PL_RESEAU)
-    if not TRAJET_DISPONIBLE:
-        return jsonify({"error": "Graphe routier indisponible "
-                                 "(lancer pipeline/p08_graphe_routier.py)."}), 404
     if _RESEAU_ROUTIER_CACHE is None:
+        if not TRAJET_DISPONIBLE:
+            return jsonify({"error": "Graphe routier indisponible "
+                                     "(lancer pipeline/p08_graphe_routier.py)."}), 404
         _RESEAU_ROUTIER_CACHE = _construire_reseau_routier_json()
     return app.response_class(_RESEAU_ROUTIER_CACHE, mimetype="application/json")
 
 
 # --- API génériques ----------------------------------------------------
-# Mode statique : fichiers .json.gz pré-calculés servis tels quels.
-# Sinon : chaînes JSON pré-sérialisées au démarrage (cf. COMPACTION MÉMOIRE).
+# Chaînes JSON pré-sérialisées au démarrage (mode statique : décompressées
+# depuis les .json.gz pré-calculés ; sinon compactées depuis les objets
+# Python, cf. COMPACTION MÉMOIRE) : les routes les servent telles quelles.
 @app.route("/api/segments")
 def api_segments():
     ds = _dataset(request.args.get("mode", "normal"))
-    if "segments_gz" in ds:
-        return _reponse_payload_gz(ds["segments_gz"])
     return app.response_class(ds["segments_json"], mimetype="application/json")
 
 
 @app.route("/api/relations")
 def api_relations():
     ds = _dataset(request.args.get("mode", "normal"))
-    if "relations_gz" in ds:
-        return _reponse_payload_gz(ds["relations_gz"])
     return app.response_class(ds["relations_json"], mimetype="application/json")
 
 
 @app.route("/api/stops")
 def api_stops():
-    if STOPS_JSON is None:
-        return _reponse_payload_gz(PATH_PL_STOPS)
     return app.response_class(STOPS_JSON, mimetype="application/json")
 
 
