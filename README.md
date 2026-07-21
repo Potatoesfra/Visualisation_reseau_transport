@@ -111,11 +111,33 @@ Le serveur lit ses variables d'environnement via `config.py` :
 |---|---|---|
 | `VIZ_HOTE` / `VIZ_PORT` | hôte / port d'écoute | `127.0.0.1` / `5000` |
 | `PORT` | port imposé par un PaaS (Render, Heroku…) : bascule automatiquement l'écoute sur `0.0.0.0:$PORT` | — |
-| `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation) → RSS ≈ 220 Mo, tient sur une instance 512 Mo | non défini |
+| `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation, désactive Graphe/Graphe de calcul) | non défini |
+| `VIZ_FORCE_CALCUL` | `1` = force la reconstruction dynamique même si les payloads statiques existent (utilisé par l'exporteur, sinon inutile) | non défini |
 
-Au démarrage, les gros payloads (segments, relations, arrêts) sont **sérialisés
-une seule fois en JSON compact** puis les objets Python sont libérés : le RSS
-chute fortement et les routes `/api/*` servent la chaîne telle quelle.
+### Mode statique — calcul en local, rendu en ligne
+
+Le calcul des payloads (segments, relations, arrêts, réseau routier) est
+**fait une fois en local**, sur un poste avec assez de RAM, puis versionné :
+
+```bash
+python scripts/exporter_payloads_statiques.py
+```
+
+Ceci écrit `data_derivee/payloads_statiques/*.json.gz` (~6,5 Mo au total,
+compressés ~5×). Tant que `VIZ_LIGHT=1` **et** que ce dossier existe, le
+serveur les sert tels quels au démarrage : **`geopandas`/`shapely` ne sont
+jamais importés**, il n'y a plus aucune reconstruction ni pic de RAM au boot.
+Seul le graphe routier (p08, pour le routage Dijkstra des trajets créés) reste
+chargé en mémoire — c'est la seule chose encore « calculée » en ligne.
+
+RSS mesuré (VIZ_LIGHT + payloads statiques) : **~140 Mo au démarrage, ~280 Mo
+au pic** (après une estimation de trajet) — large marge sur une instance
+512 Mo Render, contre 740 Mo en mode complet sans aucune optimisation.
+
+À relancer après toute régénération du pipeline (p01–p08), puis committer
+`data_derivee/payloads_statiques/`.
+
+### Serveur de production
 
 Un blueprint **Render** (`render.yaml`) et un **`Procfile`** sont fournis.
 La commande de production utilise gunicorn (ajouté à `requirements.txt`),
@@ -128,8 +150,10 @@ gunicorn --chdir serveur serveur_viz:app --workers 1 --timeout 300 --bind 0.0.0.
 ```
 
 - `render.yaml` déploie en plan **gratuit** avec `VIZ_LIGHT=1` (les pages
-  Consommation/Simulation et le mode fusion sont désactivés en ligne). Pour tout
-  activer, retirer `VIZ_LIGHT` et passer en plan **standard** (≥ 2 Go de RAM).
+  Consommation/Simulation, Graphe/Graphe de calcul et le mode fusion sont
+  désactivés en ligne). Pour tout activer, retirer `VIZ_LIGHT` et passer en
+  plan **standard** (≥ 2 Go de RAM) — le serveur reconstruit alors tout
+  dynamiquement depuis `data_derivee/` au démarrage (mode d'origine).
 - Le serveur est en **lecture seule** ; les lignes créées sont stockées dans le
   `localStorage` du navigateur — le disque éphémère d'un PaaS convient.
 
@@ -179,15 +203,16 @@ et formules partagées par le pipeline, la simulation et le trajet cliqué) :
 ## Structure du dépôt
 
 ```
-config.py                  chemins + hôte/port + drapeau VIZ_LIGHT
+config.py                  chemins + hôte/port + drapeaux VIZ_LIGHT/VIZ_FORCE_CALCUL
 render.yaml, Procfile      déploiement PaaS (Render / gunicorn)
-scripts/                   téléchargement des données brutes
+scripts/                   téléchargement des données brutes + export payloads statiques
 pipeline/p01..p08          étapes de production des dérivés (voir ci-dessus)
 serveur/serveur_viz.py     serveur Flask (pages + API JSON)
 serveur/modele_physique.py modèle road-load / cinématique / Dijkstra
 serveur/templates,static   pages HTML + JS (Leaflet, Cytoscape, Plotly)
 data_brute/                sources ouvertes (non versionnées, sauf normales ECCC)
 data_derivee/              dérivés versionnés (l'app marche dès le clone)
+data_derivee/payloads_statiques/  segments/relations/arrêts/réseau routier pré-calculés (mode statique)
 ```
 
 ## API principale

@@ -1,0 +1,4088 @@
+{
+ "lignes": [
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "16",
+  "17",
+  "18",
+  "19",
+  "22",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "32",
+  "33",
+  "34",
+  "35",
+  "36",
+  "37",
+  "38",
+  "39",
+  "40",
+  "41",
+  "43",
+  "44",
+  "45",
+  "46",
+  "47",
+  "48",
+  "49",
+  "50",
+  "51",
+  "52",
+  "54",
+  "55",
+  "56",
+  "57",
+  "61",
+  "63",
+  "64",
+  "66",
+  "67",
+  "68",
+  "69",
+  "70",
+  "71",
+  "72",
+  "73",
+  "74",
+  "80",
+  "81",
+  "85",
+  "86",
+  "90",
+  "92",
+  "93",
+  "94",
+  "95",
+  "97",
+  "99",
+  "100",
+  "101",
+  "102",
+  "103",
+  "104",
+  "105",
+  "106",
+  "107",
+  "108",
+  "110",
+  "112",
+  "113",
+  "114",
+  "115",
+  "117",
+  "119",
+  "121",
+  "123",
+  "124",
+  "125",
+  "126",
+  "128",
+  "129",
+  "131",
+  "135",
+  "136",
+  "138",
+  "139",
+  "140",
+  "141",
+  "144",
+  "146",
+  "150",
+  "160",
+  "161",
+  "162",
+  "164",
+  "165",
+  "166",
+  "168",
+  "170",
+  "171",
+  "172",
+  "174",
+  "175",
+  "176",
+  "177",
+  "179",
+  "180",
+  "183",
+  "185",
+  "186",
+  "187",
+  "188",
+  "189",
+  "190",
+  "192",
+  "193",
+  "195",
+  "196",
+  "197",
+  "198",
+  "200",
+  "201",
+  "202",
+  "203",
+  "204",
+  "205",
+  "206",
+  "207",
+  "208",
+  "209",
+  "211",
+  "212",
+  "213",
+  "215",
+  "216",
+  "217",
+  "218",
+  "219",
+  "220",
+  "225",
+  "350",
+  "353",
+  "354",
+  "355",
+  "356",
+  "357",
+  "358",
+  "359",
+  "360",
+  "361",
+  "362",
+  "363",
+  "364",
+  "365",
+  "368",
+  "369",
+  "370",
+  "371",
+  "372",
+  "376",
+  "378",
+  "380",
+  "382",
+  "401",
+  "405",
+  "407",
+  "409",
+  "410",
+  "411",
+  "419",
+  "420",
+  "425",
+  "428",
+  "430",
+  "432",
+  "439",
+  "440",
+  "444",
+  "445",
+  "448",
+  "449",
+  "460",
+  "465",
+  "467",
+  "468",
+  "469",
+  "470",
+  "475",
+  "480",
+  "485",
+  "486",
+  "487",
+  "491",
+  "496",
+  "711",
+  "747",
+  "767",
+  "769",
+  "777",
+  "811",
+  "812",
+  "814",
+  "822",
+  "872",
+  "968"
+ ],
+ "lignes_parcours": {
+  "107": [
+   {
+    "id": "107_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "107_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "131": [
+   {
+    "id": "131_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "131_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "131_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   },
+   {
+    "id": "131_4",
+    "label": "Nord destination Antonio-Dagenais / Lespinay",
+    "direction": "Nord",
+    "headsign": "Nord destination Antonio-Dagenais / Lespinay",
+    "typicality": 0
+   }
+  ],
+  "72": [
+   {
+    "id": "72_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "72_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "150": [
+   {
+    "id": "150_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "150_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "164": [
+   {
+    "id": "164_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "164_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "51": [
+   {
+    "id": "51_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "51_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "11": [
+   {
+    "id": "11_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "11_5",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "11_4",
+    "label": "Ouest destination Gatineau / Queen-Mary",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Gatineau / Queen-Mary",
+    "typicality": 0
+   },
+   {
+    "id": "11_6",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "368": [
+   {
+    "id": "368_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "368_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "117": [
+   {
+    "id": "117_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "117_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "144": [
+   {
+    "id": "144_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "144_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "24": [
+   {
+    "id": "24_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "24_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "24_3",
+    "label": "Ouest destination Station Sherbrooke",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Station Sherbrooke",
+    "typicality": 0
+   }
+  ],
+  "36": [
+   {
+    "id": "36_6",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "36_7",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   }
+  ],
+  "40": [
+   {
+    "id": "40_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "40_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "40_3",
+    "label": "Est destination École secondaire P.A.T.",
+    "direction": "Est",
+    "headsign": "Est destination École secondaire P.A.T.",
+    "typicality": 0
+   }
+  ],
+  "186": [
+   {
+    "id": "186_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "186_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "409": [
+   {
+    "id": "409_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "409_2",
+    "label": "Sud via Davignon",
+    "direction": "Sud",
+    "headsign": "Sud via Davignon",
+    "typicality": 1
+   },
+   {
+    "id": "409_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   },
+   {
+    "id": "409_4",
+    "label": "Nord via Davignon",
+    "direction": "Nord",
+    "headsign": "Nord via Davignon",
+    "typicality": 0
+   }
+  ],
+  "44": [
+   {
+    "id": "44_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "44_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "44_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   }
+  ],
+  "215": [
+   {
+    "id": "215_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "215_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "33": [
+   {
+    "id": "33_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "33_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "33_3",
+    "label": "Sud destination Hector-Barsalou / de Boucherville",
+    "direction": "Sud",
+    "headsign": "Sud destination Hector-Barsalou / de Boucherville",
+    "typicality": 0
+   },
+   {
+    "id": "33_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 0
+   }
+  ],
+  "440": [
+   {
+    "id": "440_1",
+    "label": "Ouest via Charleroi / Fleury",
+    "direction": "Ouest",
+    "headsign": "Ouest via Charleroi / Fleury",
+    "typicality": 1
+   },
+   {
+    "id": "440_5",
+    "label": "Est via Fleury / Charleroi",
+    "direction": "Est",
+    "headsign": "Est via Fleury / Charleroi",
+    "typicality": 1
+   },
+   {
+    "id": "440_3",
+    "label": "Ouest via Industriel",
+    "direction": "Ouest",
+    "headsign": "Ouest via Industriel",
+    "typicality": 0
+   },
+   {
+    "id": "440_4",
+    "label": "Est via Industriel",
+    "direction": "Est",
+    "headsign": "Est via Industriel",
+    "typicality": 0
+   }
+  ],
+  "188": [
+   {
+    "id": "188_1",
+    "label": "Est via Lavoisier",
+    "direction": "Est",
+    "headsign": "Est via Lavoisier",
+    "typicality": 1
+   },
+   {
+    "id": "188_2",
+    "label": "Ouest via Couture",
+    "direction": "Ouest",
+    "headsign": "Ouest via Couture",
+    "typicality": 1
+   },
+   {
+    "id": "188_3",
+    "label": "Est via Couture",
+    "direction": "Est",
+    "headsign": "Est via Couture",
+    "typicality": 0
+   },
+   {
+    "id": "188_4",
+    "label": "Ouest via Lavoisier",
+    "direction": "Ouest",
+    "headsign": "Ouest via Lavoisier",
+    "typicality": 0
+   }
+  ],
+  "55": [
+   {
+    "id": "55_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "55_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "350": [
+   {
+    "id": "350_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "350_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "97": [
+   {
+    "id": "97_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "97_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "140": [
+   {
+    "id": "140_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "140_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "217": [
+   {
+    "id": "217_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "217_10",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "217_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "196": [
+   {
+    "id": "196_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "196_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "196_3",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 0
+   }
+  ],
+  "146": [
+   {
+    "id": "146_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "146_7",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "146_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "146_6",
+    "label": "Est destination Georges-Baril / Henri-Bourassa",
+    "direction": "Est",
+    "headsign": "Est destination Georges-Baril / Henri-Bourassa",
+    "typicality": 0
+   }
+  ],
+  "448": [
+   {
+    "id": "448_2",
+    "label": "Est via Maurice-Duplessis",
+    "direction": "Est",
+    "headsign": "Est via Maurice-Duplessis",
+    "typicality": 1
+   },
+   {
+    "id": "448_3",
+    "label": "Ouest via Maurice-Duplessis",
+    "direction": "Ouest",
+    "headsign": "Ouest via Maurice-Duplessis",
+    "typicality": 1
+   },
+   {
+    "id": "448_1",
+    "label": "Ouest via du Golf",
+    "direction": "Ouest",
+    "headsign": "Ouest via du Golf",
+    "typicality": 0
+   },
+   {
+    "id": "448_4",
+    "label": "Est via du Golf",
+    "direction": "Est",
+    "headsign": "Est via du Golf",
+    "typicality": 0
+   }
+  ],
+  "115": [
+   {
+    "id": "115_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "115_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "115_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "115_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "160": [
+   {
+    "id": "160_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "160_5",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "216": [
+   {
+    "id": "216_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "216_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "108": [
+   {
+    "id": "108_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "108_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "70": [
+   {
+    "id": "70_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "70_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "70_4",
+    "label": "Ouest destination Raymond-Lasnier / Beaulac",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Raymond-Lasnier / Beaulac",
+    "typicality": 0
+   }
+  ],
+  "439": [
+   {
+    "id": "439_3",
+    "label": "Nord destination Cégep Marie-Victorin",
+    "direction": "Nord",
+    "headsign": "Nord destination Cégep Marie-Victorin",
+    "typicality": 1
+   },
+   {
+    "id": "439_4",
+    "label": "Sud destination Pie-IX / Notre-Dame",
+    "direction": "Sud",
+    "headsign": "Sud destination Pie-IX / Notre-Dame",
+    "typicality": 1
+   },
+   {
+    "id": "439_1",
+    "label": "Sud destination Pie-IX / Notre-Dame",
+    "direction": "Sud",
+    "headsign": "Sud destination Pie-IX / Notre-Dame",
+    "typicality": 0
+   },
+   {
+    "id": "439_2",
+    "label": "Nord destination Laval",
+    "direction": "Nord",
+    "headsign": "Nord destination Laval",
+    "typicality": 0
+   },
+   {
+    "id": "439_5",
+    "label": "Nord destination Henri-Bourassa / Pie-IX",
+    "direction": "Nord",
+    "headsign": "Nord destination Henri-Bourassa / Pie-IX",
+    "typicality": 0
+   },
+   {
+    "id": "439_6",
+    "label": "Sud destination Station Pie-IX",
+    "direction": "Sud",
+    "headsign": "Sud destination Station Pie-IX",
+    "typicality": 0
+   }
+  ],
+  "487": [
+   {
+    "id": "487_1",
+    "label": "Ouest via Notre-Dame / De Montigny",
+    "direction": "Ouest",
+    "headsign": "Ouest via Notre-Dame / De Montigny",
+    "typicality": 1
+   },
+   {
+    "id": "487_2",
+    "label": "Est via De Montigny / Notre-Dame",
+    "direction": "Est",
+    "headsign": "Est via De Montigny / Notre-Dame",
+    "typicality": 1
+   },
+   {
+    "id": "487_4",
+    "label": "Est via Industriel / Sherbrooke",
+    "direction": "Est",
+    "headsign": "Est via Industriel / Sherbrooke",
+    "typicality": 0
+   },
+   {
+    "id": "487_5",
+    "label": "Ouest via Sherbrooke / Industriel",
+    "direction": "Ouest",
+    "headsign": "Ouest via Sherbrooke / Industriel",
+    "typicality": 0
+   }
+  ],
+  "95": [
+   {
+    "id": "95_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "95_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "485": [
+   {
+    "id": "485_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "485_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "94": [
+   {
+    "id": "94_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "94_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "92": [
+   {
+    "id": "92_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "92_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "365": [
+   {
+    "id": "365_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "365_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "371": [
+   {
+    "id": "371_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "371_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "85": [
+   {
+    "id": "85_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "85_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "37": [
+   {
+    "id": "37_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "37_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "425": [
+   {
+    "id": "425_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "425_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "444": [
+   {
+    "id": "444_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "444_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "353": [
+   {
+    "id": "353_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "353_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "100": [
+   {
+    "id": "100_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "100_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "432": [
+   {
+    "id": "432_8",
+    "label": "Nord via Lacordaire / Perras",
+    "direction": "Nord",
+    "headsign": "Nord via Lacordaire / Perras",
+    "typicality": 1
+   },
+   {
+    "id": "432_9",
+    "label": "Sud via  Perras / Lacordaire",
+    "direction": "Sud",
+    "headsign": "Sud via  Perras / Lacordaire",
+    "typicality": 1
+   },
+   {
+    "id": "432_2",
+    "label": "Nord via A-25 / Henri-Bourassa",
+    "direction": "Nord",
+    "headsign": "Nord via A-25 / Henri-Bourassa",
+    "typicality": 0
+   },
+   {
+    "id": "432_3",
+    "label": "Sud via Henri-Bourassa / A-25",
+    "direction": "Sud",
+    "headsign": "Sud via Henri-Bourassa / A-25",
+    "typicality": 0
+   },
+   {
+    "id": "432_7",
+    "label": "Nord via Lacordaire / Perras",
+    "direction": "Nord",
+    "headsign": "Nord via Lacordaire / Perras",
+    "typicality": 0
+   }
+  ],
+  "30": [
+   {
+    "id": "30_3",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "30_4",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "203": [
+   {
+    "id": "203_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "203_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "200": [
+   {
+    "id": "200_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "200_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "812": [
+   {
+    "id": "812_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "812_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "769": [
+   {
+    "id": "769_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "359": [
+   {
+    "id": "359_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "359_5",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "174": [
+   {
+    "id": "174_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "174_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "18": [
+   {
+    "id": "18_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "18_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "470": [
+   {
+    "id": "470_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "470_3",
+    "label": "Ouest destination Pierrefonds / Château-Pierrefonds",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Pierrefonds / Château-Pierrefonds",
+    "typicality": 1
+   },
+   {
+    "id": "470_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   },
+   {
+    "id": "470_5",
+    "label": "Ouest destination Pierrefonds / Winnie-Wakefield",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Pierrefonds / Winnie-Wakefield",
+    "typicality": 0
+   },
+   {
+    "id": "470_6",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "168": [
+   {
+    "id": "168_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "168_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "491": [
+   {
+    "id": "491_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "491_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "811": [
+   {
+    "id": "811_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "220": [
+   {
+    "id": "220_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "220_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "171": [
+   {
+    "id": "171_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "171_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "171_3",
+    "label": "Ouest destination Gare Bois-Franc",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Gare Bois-Franc",
+    "typicality": 0
+   },
+   {
+    "id": "171_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "90": [
+   {
+    "id": "90_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "90_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "382": [
+   {
+    "id": "382_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "382_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "106": [
+   {
+    "id": "106_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "106_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "45": [
+   {
+    "id": "45_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "45_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "45_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   }
+  ],
+  "179": [
+   {
+    "id": "179_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "179_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "747": [
+   {
+    "id": "747_6",
+    "label": "Est - Vers le centre-ville de Montréal trajet 1 gare d’autocars de Montréal",
+    "direction": "Est - Vers le centre-ville de Montréal",
+    "headsign": "Est - Vers le centre-ville de Montréal trajet 1 gare d’autocars de Montréal",
+    "typicality": 1
+   },
+   {
+    "id": "747_7",
+    "label": "Ouest - Vers YUL aéroport Montréal-Trudeau",
+    "direction": "Ouest - Vers YUL aéroport Montréal-Trudeau",
+    "headsign": "Ouest - Vers YUL aéroport Montréal-Trudeau",
+    "typicality": 1
+   }
+  ],
+  "767": [
+   {
+    "id": "767_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "86": [
+   {
+    "id": "86_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "86_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "74": [
+   {
+    "id": "74_1",
+    "label": "Sud via Wellington / Bridge",
+    "direction": "Sud",
+    "headsign": "Sud via Wellington / Bridge",
+    "typicality": 1
+   },
+   {
+    "id": "74_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "74_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   }
+  ],
+  "124": [
+   {
+    "id": "124_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "124_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "57": [
+   {
+    "id": "57_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "57_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "177": [
+   {
+    "id": "177_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "177_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "13": [
+   {
+    "id": "13_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "13_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "204": [
+   {
+    "id": "204_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "204_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "121": [
+   {
+    "id": "121_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "121_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "47": [
+   {
+    "id": "47_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "47_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "110": [
+   {
+    "id": "110_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "110_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "135": [
+   {
+    "id": "135_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "135_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "166": [
+   {
+    "id": "166_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "166_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "166_3",
+    "label": "Sud via Ridgewood",
+    "direction": "Sud",
+    "headsign": "Sud via Ridgewood",
+    "typicality": 0
+   },
+   {
+    "id": "166_4",
+    "label": "Nord via Ridgewood",
+    "direction": "Nord",
+    "headsign": "Nord via Ridgewood",
+    "typicality": 0
+   },
+   {
+    "id": "166_5",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 0
+   }
+  ],
+  "192": [
+   {
+    "id": "192_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "192_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "361": [
+   {
+    "id": "361_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "361_5",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "211": [
+   {
+    "id": "211_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "211_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "43": [
+   {
+    "id": "43_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "43_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "360": [
+   {
+    "id": "360_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "360_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "170": [
+   {
+    "id": "170_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "170_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "197": [
+   {
+    "id": "197_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "197_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "197_3",
+    "label": "Est via de la Pépinière",
+    "direction": "Est",
+    "headsign": "Est via de la Pépinière",
+    "typicality": 0
+   }
+  ],
+  "80": [
+   {
+    "id": "80_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "80_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "48": [
+   {
+    "id": "48_7",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "48_8",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "48_9",
+    "label": "Ouest via Gouin / Ozias-Leduc",
+    "direction": "Ouest",
+    "headsign": "Ouest via Gouin / Ozias-Leduc",
+    "typicality": 0
+   },
+   {
+    "id": "48_10",
+    "label": "Est via Gouin / Ozias-Leduc",
+    "direction": "Est",
+    "headsign": "Est via Gouin / Ozias-Leduc",
+    "typicality": 0
+   }
+  ],
+  "195": [
+   {
+    "id": "195_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "195_5",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "195_6",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   }
+  ],
+  "129": [
+   {
+    "id": "129_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "129_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "129_3",
+    "label": "Sud destination Notre-Dame / St-Gabriel",
+    "direction": "Sud",
+    "headsign": "Sud destination Notre-Dame / St-Gabriel",
+    "typicality": 0
+   },
+   {
+    "id": "129_4",
+    "label": "Nord destination Décarie / Lucy",
+    "direction": "Nord",
+    "headsign": "Nord destination Décarie / Lucy",
+    "typicality": 0
+   }
+  ],
+  "29": [
+   {
+    "id": "29_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "29_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "128": [
+   {
+    "id": "128_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "128_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "475": [
+   {
+    "id": "475_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "475_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "165": [
+   {
+    "id": "165_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "165_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "32": [
+   {
+    "id": "32_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "32_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "354": [
+   {
+    "id": "354_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "354_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "449": [
+   {
+    "id": "449_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "449_3",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "428": [
+   {
+    "id": "428_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "428_14",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "69": [
+   {
+    "id": "69_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "69_5",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "460": [
+   {
+    "id": "460_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "460_4",
+    "label": "Est via Jarry",
+    "direction": "Est",
+    "headsign": "Est via Jarry",
+    "typicality": 1
+   },
+   {
+    "id": "460_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "460_5",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "460_6",
+    "label": "Est via Jarry",
+    "direction": "Est",
+    "headsign": "Est via Jarry",
+    "typicality": 0
+   }
+  ],
+  "208": [
+   {
+    "id": "208_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "208_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "10": [
+   {
+    "id": "10_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "10_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "198": [
+   {
+    "id": "198_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "198_14",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "198_15",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "198_16",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "63": [
+   {
+    "id": "63_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "63_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "411": [
+   {
+    "id": "411_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "411_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "420": [
+   {
+    "id": "420_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "420_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "46": [
+   {
+    "id": "46_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "46_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "71": [
+   {
+    "id": "71_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "71_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "54": [
+   {
+    "id": "54_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "54_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "41": [
+   {
+    "id": "41_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "41_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "209": [
+   {
+    "id": "209_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "209_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "822": [
+   {
+    "id": "822_1",
+    "label": "Boucle - Secteur Longue-Pointe",
+    "direction": "Boucle - Secteur Longue-Pointe",
+    "headsign": "Boucle - Secteur Longue-Pointe",
+    "typicality": 1
+   }
+  ],
+  "175": [
+   {
+    "id": "175_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "175_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "407": [
+   {
+    "id": "407_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "407_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "172": [
+   {
+    "id": "172_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "172_11",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "26": [
+   {
+    "id": "26_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "26_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "777": [
+   {
+    "id": "777_6",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "777_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   },
+   {
+    "id": "777_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   }
+  ],
+  "138": [
+   {
+    "id": "138_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "138_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "119": [
+   {
+    "id": "119_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "119_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "480": [
+   {
+    "id": "480_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "480_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "480_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 0
+   }
+  ],
+  "52": [
+   {
+    "id": "52_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "52_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "52_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "52_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "213": [
+   {
+    "id": "213_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "213_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "213_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   },
+   {
+    "id": "213_4",
+    "label": "Ouest destination Brabant-Marineau / De Baene",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Brabant-Marineau / De Baene",
+    "typicality": 0
+   }
+  ],
+  "35": [
+   {
+    "id": "35_22",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "35_23",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "201": [
+   {
+    "id": "201_1",
+    "label": "Nord sur St-Jean et sud sur St-Charles",
+    "direction": "Nord sur St-Jean et sud sur St-Charles",
+    "headsign": "Nord sur St-Jean et sud sur St-Charles",
+    "typicality": 1
+   },
+   {
+    "id": "201_3",
+    "label": "Sud sur St-Jean et nord sur St-Charles",
+    "direction": "Sud sur St-Jean et nord sur St-Charles",
+    "headsign": "Sud sur St-Jean et nord sur St-Charles",
+    "typicality": 1
+   },
+   {
+    "id": "201_2",
+    "label": "Sud sur St-Jean et nord sur St-Charles",
+    "direction": "Sud sur St-Jean et nord sur St-Charles",
+    "headsign": "Sud sur St-Jean et nord sur St-Charles",
+    "typicality": 0
+   },
+   {
+    "id": "201_4",
+    "label": "Nord sur St-Jean et sud sur St-Charles",
+    "direction": "Nord sur St-Jean et sud sur St-Charles",
+    "headsign": "Nord sur St-Jean et sud sur St-Charles",
+    "typicality": 0
+   }
+  ],
+  "445": [
+   {
+    "id": "445_15",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "445_16",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "968": [
+   {
+    "id": "968_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "968_28",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "419": [
+   {
+    "id": "419_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "419_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "34": [
+   {
+    "id": "34_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "34_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "102": [
+   {
+    "id": "102_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "102_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "114": [
+   {
+    "id": "114_11",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "114_12",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "814": [
+   {
+    "id": "814_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "369": [
+   {
+    "id": "369_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "369_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "380": [
+   {
+    "id": "380_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "380_5",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "14": [
+   {
+    "id": "14_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "14_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "126": [
+   {
+    "id": "126_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "126_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "104": [
+   {
+    "id": "104_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "104_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "372": [
+   {
+    "id": "372_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "372_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "73": [
+   {
+    "id": "73_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "73_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "28": [
+   {
+    "id": "28_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "28_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "68": [
+   {
+    "id": "68_8",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "68_2",
+    "label": "Ouest destination Anse-à-l'Orme / Timberlea-Trail",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Anse-à-l'Orme / Timberlea-Trail",
+    "typicality": 0
+   },
+   {
+    "id": "68_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 0
+   }
+  ],
+  "496": [
+   {
+    "id": "496_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "496_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "363": [
+   {
+    "id": "363_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "363_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "183": [
+   {
+    "id": "183_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "183_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "218": [
+   {
+    "id": "218_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "218_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "93": [
+   {
+    "id": "93_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "93_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "101": [
+   {
+    "id": "101_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "101_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "206": [
+   {
+    "id": "206_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "206_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "17": [
+   {
+    "id": "17_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "17_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "38": [
+   {
+    "id": "38_10",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "38_12",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "193": [
+   {
+    "id": "193_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "193_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "364": [
+   {
+    "id": "364_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "364_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "125": [
+   {
+    "id": "125_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "125_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "125_4",
+    "label": "Ouest destination Station Frontenac",
+    "direction": "Ouest",
+    "headsign": "Ouest destination Station Frontenac",
+    "typicality": 0
+   }
+  ],
+  "376": [
+   {
+    "id": "376_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "376_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "141": [
+   {
+    "id": "141_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "141_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "81": [
+   {
+    "id": "81_22",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "81_23",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "202": [
+   {
+    "id": "202_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "202_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "225": [
+   {
+    "id": "225_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "225_7",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "27": [
+   {
+    "id": "27_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "27_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "187": [
+   {
+    "id": "187_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "187_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "401": [
+   {
+    "id": "401_2",
+    "label": "Sud via Château-Pierrefonds",
+    "direction": "Sud",
+    "headsign": "Sud via Château-Pierrefonds",
+    "typicality": 1
+   },
+   {
+    "id": "401_3",
+    "label": "Nord via Château-Pierrefonds",
+    "direction": "Nord",
+    "headsign": "Nord via Château-Pierrefonds",
+    "typicality": 1
+   },
+   {
+    "id": "401_1",
+    "label": "Nord via St-Charles",
+    "direction": "Nord",
+    "headsign": "Nord via St-Charles",
+    "typicality": 0
+   },
+   {
+    "id": "401_4",
+    "label": "Sud via St-Charles",
+    "direction": "Sud",
+    "headsign": "Sud via St-Charles",
+    "typicality": 0
+   }
+  ],
+  "872": [
+   {
+    "id": "872_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "872_7",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "469": [
+   {
+    "id": "469_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "469_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "56": [
+   {
+    "id": "56_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "56_32",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "161": [
+   {
+    "id": "161_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "161_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "212": [
+   {
+    "id": "212_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "66": [
+   {
+    "id": "66_3",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "66_4",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "66_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 0
+   }
+  ],
+  "99": [
+   {
+    "id": "99_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "99_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "25": [
+   {
+    "id": "25_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "25_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "49": [
+   {
+    "id": "49_8",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "49_9",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "49_10",
+    "label": "Est destination Cégep Marie-Victorin",
+    "direction": "Est",
+    "headsign": "Est destination Cégep Marie-Victorin",
+    "typicality": 0
+   },
+   {
+    "id": "49_11",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "49_12",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   },
+   {
+    "id": "49_13",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   }
+  ],
+  "105": [
+   {
+    "id": "105_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "105_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "205": [
+   {
+    "id": "205_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "205_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "190": [
+   {
+    "id": "190_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "190_4",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "139": [
+   {
+    "id": "139_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "139_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "50": [
+   {
+    "id": "50_10",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "50_11",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "19": [
+   {
+    "id": "19_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "19_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "19_4",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 0
+   }
+  ],
+  "22": [
+   {
+    "id": "22_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "22_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "162": [
+   {
+    "id": "162_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "162_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "12": [
+   {
+    "id": "12_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "12_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "207": [
+   {
+    "id": "207_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "207_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "136": [
+   {
+    "id": "136_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "136_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "410": [
+   {
+    "id": "410_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "410_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "189": [
+   {
+    "id": "189_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "189_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "358": [
+   {
+    "id": "358_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "358_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "61": [
+   {
+    "id": "61_5",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "61_6",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "468": [
+   {
+    "id": "468_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "468_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "465": [
+   {
+    "id": "465_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "465_23",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "103": [
+   {
+    "id": "103_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "103_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "405": [
+   {
+    "id": "405_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "405_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "357": [
+   {
+    "id": "357_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "357_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "362": [
+   {
+    "id": "362_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "362_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "180": [
+   {
+    "id": "180_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "180_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "486": [
+   {
+    "id": "486_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "486_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "467": [
+   {
+    "id": "467_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "467_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "31": [
+   {
+    "id": "31_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "31_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "113": [
+   {
+    "id": "113_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "113_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "16": [
+   {
+    "id": "16_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "16_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "355": [
+   {
+    "id": "355_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "355_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "185": [
+   {
+    "id": "185_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "185_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "219": [
+   {
+    "id": "219_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "219_3",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "711": [
+   {
+    "id": "711_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "711_70",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "370": [
+   {
+    "id": "370_1",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   },
+   {
+    "id": "370_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   }
+  ],
+  "67": [
+   {
+    "id": "67_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "67_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "356": [
+   {
+    "id": "356_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "356_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "112": [
+   {
+    "id": "112_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "112_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "430": [
+   {
+    "id": "430_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "430_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "39": [
+   {
+    "id": "39_1",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "39_2",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "378": [
+   {
+    "id": "378_2",
+    "label": "Est",
+    "direction": "Est",
+    "headsign": "Est",
+    "typicality": 1
+   },
+   {
+    "id": "378_3",
+    "label": "Ouest",
+    "direction": "Ouest",
+    "headsign": "Ouest",
+    "typicality": 1
+   }
+  ],
+  "123": [
+   {
+    "id": "123_1",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   },
+   {
+    "id": "123_2",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   }
+  ],
+  "64": [
+   {
+    "id": "64_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "64_2",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ],
+  "176": [
+   {
+    "id": "176_1",
+    "label": "Nord",
+    "direction": "Nord",
+    "headsign": "Nord",
+    "typicality": 1
+   },
+   {
+    "id": "176_11",
+    "label": "Sud",
+    "direction": "Sud",
+    "headsign": "Sud",
+    "typicality": 1
+   }
+  ]
+ },
+ "types_relations": [
+  "diverge",
+  "intersection",
+  "merge",
+  "oppose",
+  "parallele_proche",
+  "portion_partagee",
+  "suivant"
+ ],
+ "center": [
+  45.525483336593624,
+  -73.64090557083001
+ ],
+ "n_segments": 15825,
+ "n_relations": 105653,
+ "n_stops": 8620
+}

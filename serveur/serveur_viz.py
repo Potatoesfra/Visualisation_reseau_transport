@@ -32,18 +32,32 @@ Lancement :
 # ===============================================================
 import gc
 import json
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import (Flask, render_template, jsonify, request,
+                   send_file, send_from_directory)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from config import DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT, VIZ_LIGHT  # noqa: E402
 from modele_physique import profil_cinematique, GrapheRoutier  # noqa: E402
+
+# geopandas / shapely ne sont importés que si les payloads doivent être
+# reconstruits : en mode statique (payloads pré-calculés), ~100 Mo de
+# bibliothèques géo ne sont jamais chargés.
+gpd = None
+Point = None
+
+
+def _import_geo():
+    global gpd, Point
+    if gpd is None:
+        import geopandas as _gpd
+        from shapely.geometry import Point as _Point
+        gpd, Point = _gpd, _Point
 
 
 # %% =============================================================
@@ -85,6 +99,23 @@ PATH_ROUTE_PATTERNS = GTFS_DIR / "route_patterns.txt"
 
 # --- Normales climatiques (température par mois pour le trajet tracé) ---
 PATH_NORMALES = DATA_BRUTE / "normales_climatiques_montreal.csv"
+
+# --- Payloads statiques pré-calculés (scripts/exporter_payloads_statiques.py) ---
+DIR_PAYLOADS      = DATA_DERIVEE / "payloads_statiques"
+PATH_PL_SEGMENTS  = DIR_PAYLOADS / "segments_normal.json.gz"
+PATH_PL_RELATIONS = DIR_PAYLOADS / "relations_normal.json.gz"
+PATH_PL_STOPS     = DIR_PAYLOADS / "stops.json.gz"
+PATH_PL_RESEAU    = DIR_PAYLOADS / "reseau_routier.json.gz"
+PATH_PL_META      = DIR_PAYLOADS / "meta_statique.json"
+
+# Mode statique : en VIZ_LIGHT, si les payloads pré-calculés existent, ils sont
+# servis tels quels — aucune reconstruction, ni geopandas, ni pic de boot.
+# VIZ_FORCE_CALCUL=1 force la reconstruction (utilisé par l'exporteur).
+MODE_STATIQUE = (VIZ_LIGHT
+                 and os.environ.get("VIZ_FORCE_CALCUL", "") != "1"
+                 and all(p.exists() for p in (
+                     PATH_PL_SEGMENTS, PATH_PL_RELATIONS, PATH_PL_STOPS,
+                     PATH_PL_RESEAU, PATH_PL_META)))
 
 # Colonnes d'attributs (p04_attributs_segments.py) exposées dans les panneaux.
 # L'ordre est conservé pour l'affichage groupé côté client.
@@ -239,6 +270,7 @@ def build_dataset(path_segments, path_relations, path_centralite,
 
     Retourne un dict : segments, relations, lignes, types, center, codes_utiles.
     """
+    _import_geo()
     segments = gpd.read_file(path_segments).to_crs("EPSG:4326").reset_index(drop=True)
     segments["segment_id"] = segments.index.astype(int)
     segments["route_id"] = segments["route_id"].astype(str)
@@ -344,9 +376,26 @@ def build_dataset(path_segments, path_relations, path_centralite,
 # ===============================================================
 print("=== Chargement des données ===")
 
-print("Jeu normal...")
-DATASETS = {"normal": build_dataset(PATH_SEGMENTS, PATH_RELATIONS, PATH_CENTRALITE,
-                                    path_attributs=PATH_ATTRIBUTS)}
+if MODE_STATIQUE:
+    print("Mode statique : payloads pré-calculés servis tels quels "
+          "(régénération : scripts/exporter_payloads_statiques.py)")
+    with open(PATH_PL_META, "r", encoding="utf-8") as f:
+        _meta_stat = json.load(f)
+    DATASETS = {"normal": {
+        "lignes":       _meta_stat["lignes"],
+        "types":        _meta_stat["types_relations"],
+        "center":       _meta_stat["center"],
+        "n_segments":   int(_meta_stat["n_segments"]),
+        "n_relations":  int(_meta_stat["n_relations"]),
+        "segments_gz":  PATH_PL_SEGMENTS,
+        "relations_gz": PATH_PL_RELATIONS,
+    }}
+    print(f"    {DATASETS['normal']['n_segments']} seg | "
+          f"{DATASETS['normal']['n_relations']} rel (pré-calculés)")
+else:
+    print("Jeu normal...")
+    DATASETS = {"normal": build_dataset(PATH_SEGMENTS, PATH_RELATIONS, PATH_CENTRALITE,
+                                        path_attributs=PATH_ATTRIBUTS)}
 
 # --- Jeu fusion (si les fichiers existent et hors mode allégé) ---
 LIAISON_PAYLOAD = {}
@@ -396,30 +445,35 @@ def _dataset(mode):
 
 
 # --- Arrêts (communs aux deux jeux) ---
-print("Arrêts...")
-if PATH_STOPS.exists():
-    _stops = pd.read_csv(PATH_STOPS)
+if MODE_STATIQUE:
+    STOPS_PAYLOAD = None            # servis depuis stops.json.gz
+    N_STOPS = int(_meta_stat["n_stops"])
 else:
-    print(f"  ⚠ {PATH_STOPS} absent — arrêts non affichés "
-          "(voir data_brute/README.md).")
-    _stops = pd.DataFrame(columns=["stop_code", "stop_name", "stop_lat", "stop_lon"])
-_stops["stop_code"] = pd.to_numeric(_stops["stop_code"], errors="coerce")
-_stops = _stops.dropna(subset=["stop_code"]).copy()
-_stops["stop_code"] = _stops["stop_code"].astype(int)
+    print("Arrêts...")
+    if PATH_STOPS.exists():
+        _stops = pd.read_csv(PATH_STOPS)
+    else:
+        print(f"  ⚠ {PATH_STOPS} absent — arrêts non affichés "
+              "(voir data_brute/README.md).")
+        _stops = pd.DataFrame(columns=["stop_code", "stop_name", "stop_lat", "stop_lon"])
+    _stops["stop_code"] = pd.to_numeric(_stops["stop_code"], errors="coerce")
+    _stops = _stops.dropna(subset=["stop_code"]).copy()
+    _stops["stop_code"] = _stops["stop_code"].astype(int)
 
-_codes_utiles = set()
-for ds in DATASETS.values():
-    _codes_utiles |= ds["codes_utiles"]
-_stops_filtre = _stops[_stops["stop_code"].isin(_codes_utiles)]
-STOPS_PAYLOAD = [
-    {
-        "stop_code": int(r["stop_code"]),
-        "stop_name": r.get("stop_name", "") if pd.notna(r.get("stop_name")) else "",
-        "lat": float(r["stop_lat"]),
-        "lon": float(r["stop_lon"]),
-    }
-    for _, r in _stops_filtre.iterrows()
-]
+    _codes_utiles = set()
+    for ds in DATASETS.values():
+        _codes_utiles |= ds["codes_utiles"]
+    _stops_filtre = _stops[_stops["stop_code"].isin(_codes_utiles)]
+    STOPS_PAYLOAD = [
+        {
+            "stop_code": int(r["stop_code"]),
+            "stop_name": r.get("stop_name", "") if pd.notna(r.get("stop_name")) else "",
+            "lat": float(r["stop_lat"]),
+            "lon": float(r["stop_lon"]),
+        }
+        for _, r in _stops_filtre.iterrows()
+    ]
+    N_STOPS = len(STOPS_PAYLOAD)
 
 # Lignes / types : union des jeux (pour que SERVER_META reste valable après bascule)
 LIGNES_DISPONIBLES = sorted(
@@ -488,38 +542,43 @@ def _load_parcours_gtfs():
     return info
 
 
-PARCOURS_INFO = _load_parcours_gtfs()
+if MODE_STATIQUE:
+    LIGNES_PARCOURS = _meta_stat["lignes_parcours"]
+    print(f"  Parcours GTFS : {sum(len(v) for v in LIGNES_PARCOURS.values())} "
+          f"parcours pré-calculés sur {len(LIGNES_PARCOURS)} ligne(s)")
+else:
+    PARCOURS_INFO = _load_parcours_gtfs()
 
-# shape_id réellement présents dans au moins un jeu de segments
-_shapes_presentes = set()
-for ds in DATASETS.values():
-    for sp in ds["segments"]:
-        for p in (sp.get("parcours") or []):
-            if p:
-                _shapes_presentes.add(p)
+    # shape_id réellement présents dans au moins un jeu de segments
+    _shapes_presentes = set()
+    for ds in DATASETS.values():
+        for sp in ds["segments"]:
+            for p in (sp.get("parcours") or []):
+                if p:
+                    _shapes_presentes.add(p)
 
-# LIGNES_PARCOURS : {route_id: [{id, label, direction, headsign, typicality}, ...]}
-LIGNES_PARCOURS = {}
-for shape_id in _shapes_presentes:
-    meta = PARCOURS_INFO.get(shape_id)
-    if meta is None:
-        rid = shape_id.split("_")[0] if "_" in shape_id else "?"
-        meta = {"route_id": rid, "label": shape_id, "direction": "",
-                "headsign": "", "typicality": 0}
-    LIGNES_PARCOURS.setdefault(meta["route_id"], []).append({
-        "id":         shape_id,
-        "label":      meta["label"],
-        "direction":  meta["direction"],
-        "headsign":   meta["headsign"],
-        "typicality": meta["typicality"],
-    })
-for _rid, _lst in LIGNES_PARCOURS.items():
-    _lst.sort(key=lambda d: (-int(d.get("typicality") or 0), len(d["id"]), d["id"]))
+    # LIGNES_PARCOURS : {route_id: [{id, label, direction, headsign, typicality}, ...]}
+    LIGNES_PARCOURS = {}
+    for shape_id in _shapes_presentes:
+        meta = PARCOURS_INFO.get(shape_id)
+        if meta is None:
+            rid = shape_id.split("_")[0] if "_" in shape_id else "?"
+            meta = {"route_id": rid, "label": shape_id, "direction": "",
+                    "headsign": "", "typicality": 0}
+        LIGNES_PARCOURS.setdefault(meta["route_id"], []).append({
+            "id":         shape_id,
+            "label":      meta["label"],
+            "direction":  meta["direction"],
+            "headsign":   meta["headsign"],
+            "typicality": meta["typicality"],
+        })
+    for _rid, _lst in LIGNES_PARCOURS.items():
+        _lst.sort(key=lambda d: (-int(d.get("typicality") or 0), len(d["id"]), d["id"]))
 
-print(f"  Parcours GTFS : {len(_shapes_presentes)} shape(s) présent(s) "
-      f"sur {len(LIGNES_PARCOURS)} ligne(s)")
+    print(f"  Parcours GTFS : {len(_shapes_presentes)} shape(s) présent(s) "
+          f"sur {len(LIGNES_PARCOURS)} ligne(s)")
 
-print(f"  Données prêtes : modes={MODES_DISPONIBLES} | {len(STOPS_PAYLOAD)} arrêts")
+print(f"  Données prêtes : modes={MODES_DISPONIBLES} | {N_STOPS} arrêts")
 
 
 # %% =============================================================
@@ -711,18 +770,20 @@ def _fige_json(obj):
                       default=_np_item)
 
 
-for _ds in DATASETS.values():
-    _ds["n_segments"]     = len(_ds["segments"])
-    _ds["n_relations"]    = len(_ds["relations"])
-    _ds["segments_json"]  = _fige_json(_ds["segments"])
-    _ds["relations_json"] = _fige_json(_ds["relations"])
-    _ds["segments"] = _ds["relations"] = None
-    _ds.pop("codes_utiles", None)
+if MODE_STATIQUE:
+    STOPS_JSON = None               # tout est servi depuis les .json.gz
+else:
+    for _ds in DATASETS.values():
+        _ds["n_segments"]     = len(_ds["segments"])
+        _ds["n_relations"]    = len(_ds["relations"])
+        _ds["segments_json"]  = _fige_json(_ds["segments"])
+        _ds["relations_json"] = _fige_json(_ds["relations"])
+        _ds["segments"] = _ds["relations"] = None
+        _ds.pop("codes_utiles", None)
 
-N_STOPS = len(STOPS_PAYLOAD)
-STOPS_JSON = _fige_json(STOPS_PAYLOAD)
-STOPS_PAYLOAD = None
-gc.collect()
+    STOPS_JSON = _fige_json(STOPS_PAYLOAD)
+    STOPS_PAYLOAD = None
+    gc.collect()
 
 
 # %% =============================================================
@@ -1065,59 +1126,79 @@ def relief_fichier(fichier):
     return send_from_directory(DIR_RELIEF, fichier)
 
 
+def _reponse_payload_gz(path):
+    """Sert un payload .json.gz pré-compressé tel quel (Content-Encoding: gzip) :
+    aucune donnée en RAM, et ~5× moins de bande passante qu'en JSON brut."""
+    resp = send_file(path, mimetype="application/json", conditional=True)
+    resp.headers["Content-Encoding"] = "gzip"
+    resp.headers["Vary"] = "Accept-Encoding"
+    return resp
+
+
+def _construire_reseau_routier_json():
+    """Chaîne JSON {"lignes": [...]} du réseau routable : arêtes du graphe p08
+    en polylignes [lat, lon], dédupliquées par paire de nœuds (aller/retour)."""
+    aretes = GRAPHE_ROUTIER.aretes
+    na = aretes["node_a"].to_list()
+    nb = aretes["node_b"].to_list()
+    coords_col = aretes["coords"].to_list()
+    vus = set()
+    lignes = []
+    for i in range(len(coords_col)):
+        a, b = int(na[i]), int(nb[i])
+        cle = (a, b) if a <= b else (b, a)
+        if cle in vus:
+            continue
+        vus.add(cle)
+        pts = coords_col[i]
+        if isinstance(pts, str):
+            pts = json.loads(pts)
+        lignes.append([[float(p[0]), float(p[1])] for p in pts])
+    return json.dumps({"lignes": lignes}, separators=(",", ":"))
+
+
 _RESEAU_ROUTIER_CACHE = None   # chaîne JSON du réseau routable, construite 1×
 
 
 @app.route("/api/reseau_routier")
 def api_reseau_routier():
-    """Réseau routier ROUTABLE = arêtes du graphe p08 (exactement le réseau sur
-    lequel les trajets sont tracés), renvoyé en polylignes [lat, lon]. Léger et
-    versionné (contrairement à la géobase brute de 43 Mo). Les arêtes aller/retour
-    (même paire de nœuds) ne sont tracées qu'une fois. Le résultat est mis en
-    cache directement en JSON (une chaîne pèse ~5× moins que les listes Python)."""
+    """Réseau routier ROUTABLE = exactement le réseau sur lequel les trajets
+    sont tracés. En mode statique : fichier pré-calculé ; sinon construit 1×
+    et mis en cache en chaîne JSON (~5× plus léger que les listes Python)."""
     global _RESEAU_ROUTIER_CACHE
+    if MODE_STATIQUE:
+        return _reponse_payload_gz(PATH_PL_RESEAU)
     if not TRAJET_DISPONIBLE:
         return jsonify({"error": "Graphe routier indisponible "
                                  "(lancer pipeline/p08_graphe_routier.py)."}), 404
     if _RESEAU_ROUTIER_CACHE is None:
-        aretes = GRAPHE_ROUTIER.aretes
-        na = aretes["node_a"].to_list()
-        nb = aretes["node_b"].to_list()
-        coords_col = aretes["coords"].to_list()
-        vus = set()
-        lignes = []
-        for i in range(len(coords_col)):
-            a, b = int(na[i]), int(nb[i])
-            cle = (a, b) if a <= b else (b, a)
-            if cle in vus:
-                continue
-            vus.add(cle)
-            pts = coords_col[i]
-            if isinstance(pts, str):
-                pts = json.loads(pts)
-            lignes.append([[float(p[0]), float(p[1])] for p in pts])
-        _RESEAU_ROUTIER_CACHE = json.dumps({"lignes": lignes},
-                                           separators=(",", ":"))
+        _RESEAU_ROUTIER_CACHE = _construire_reseau_routier_json()
     return app.response_class(_RESEAU_ROUTIER_CACHE, mimetype="application/json")
 
 
 # --- API génériques ----------------------------------------------------
-# Les gros payloads sont pré-sérialisés au démarrage (cf. COMPACTION MÉMOIRE) :
-# on renvoie la chaîne JSON telle quelle.
+# Mode statique : fichiers .json.gz pré-calculés servis tels quels.
+# Sinon : chaînes JSON pré-sérialisées au démarrage (cf. COMPACTION MÉMOIRE).
 @app.route("/api/segments")
 def api_segments():
     ds = _dataset(request.args.get("mode", "normal"))
+    if "segments_gz" in ds:
+        return _reponse_payload_gz(ds["segments_gz"])
     return app.response_class(ds["segments_json"], mimetype="application/json")
 
 
 @app.route("/api/relations")
 def api_relations():
     ds = _dataset(request.args.get("mode", "normal"))
+    if "relations_gz" in ds:
+        return _reponse_payload_gz(ds["relations_gz"])
     return app.response_class(ds["relations_json"], mimetype="application/json")
 
 
 @app.route("/api/stops")
 def api_stops():
+    if STOPS_JSON is None:
+        return _reponse_payload_gz(PATH_PL_STOPS)
     return app.response_class(STOPS_JSON, mimetype="application/json")
 
 
