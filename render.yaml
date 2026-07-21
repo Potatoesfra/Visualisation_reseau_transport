@@ -26,3 +26,5 @@ services:
         value: "3.11"
       - key: VIZ_LIGHT
         value: "1"
+      - key: PYTHONUNBUFFERED
+        value: "1"
