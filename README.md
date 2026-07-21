@@ -31,11 +31,12 @@ automatiquement (BroadcastChannel) : sélectionner un segment sur une page le
 surligne sur les autres.
 
 > **Mode allégé (`VIZ_LIGHT=1`)** — pour l'hébergement à faible RAM (voir
-> [Déploiement](#déploiement)), le serveur peut sauter au démarrage le **mode
-> fusion**, la **Consommation** et la **Simulation** (qui dépend de la conso).
-> Seules les pages Carte, Graphe et Graphe de calcul restent actives ; les
-> contrôles correspondants sont masqués. En local (variable non définie), tout
-> reste chargé.
+> [Déploiement](#déploiement)), le serveur saute au démarrage le **mode
+> fusion**, la **Consommation** et la **Simulation** (qui dépend de la conso),
+> et désactive les pages **Graphe** et **Graphe de calcul** (purement côté
+> client, retirées pour épurer l'UI en ligne). Seule la page Carte reste
+> active ; les contrôles correspondants sont masqués. En local (variable non
+> définie), tout reste chargé.
 
 ### Outil de création de trajet
 
@@ -198,8 +199,9 @@ data_derivee/              dérivés versionnés (l'app marche dès le clone)
 `/api/relief`. Selon les données chargées :
 `/api/conso/{options,voyages,profil}` et `/api/simulation/voyage?voyage=ID`
 (absents en mode allégé `VIZ_LIGHT`). Le drapeau de chaque fonctionnalité est
-exposé par `/api/meta` (`fusion_disponible`, `conso_disponible`,
-`simulation_disponible`, `trajet_disponible`, `relief_disponible`).
+exposé par `/api/meta` (`fusion_disponible`, `graphe_disponible`,
+`conso_disponible`, `simulation_disponible`, `trajet_disponible`,
+`relief_disponible`).
 
 ## Sources et licences des données
 

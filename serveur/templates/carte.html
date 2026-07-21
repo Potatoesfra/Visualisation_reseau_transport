@@ -19,7 +19,7 @@
       <div class="panel-title">🗺️ Carte des segments</div>
       <div class="panel-sub">
         Vue géographique. Cliquez un segment pour le sélectionner (Ctrl+clic pour en ajouter).
-        Synchro avec <a href="/graphe" target="_blank" style="color:var(--accent);">la vue graphe</a>.
+        <span id="lnkGrapheWrap">Synchro avec <a href="/graphe" target="_blank" style="color:var(--accent);">la vue graphe</a>.</span>
       </div>
     </div>
 
@@ -218,7 +218,7 @@
 </script>
 
 <script src="{{ url_for('static', filename='sync.js') }}?v=8"></script>
-<script src="{{ url_for('static', filename='carte.js') }}?v=16"></script>
+<script src="{{ url_for('static', filename='carte.js') }}?v=17"></script>
 
 </body>
 </html>

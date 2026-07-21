@@ -747,6 +747,12 @@ if PATH_NORMALES.exists():
 
 RELIEF_DISPONIBLE = PATH_RELIEF_PNG.exists() and PATH_RELIEF_BOUNDS.exists()
 
+# Pages Graphe / Graphe de calcul : purement côté client (Cytoscape sur les
+# mêmes payloads /api/segments + /api/relations que la carte). Désactivées en
+# mode allégé pour épurer l'UI en ligne — aucune donnée serveur ne leur est
+# propre, donc aucun gain RAM à les retirer.
+GRAPHE_DISPONIBLE = not VIZ_LIGHT
+
 
 # %% =============================================================
 # FLASK APP
@@ -769,6 +775,8 @@ def page_carte():
 
 @app.route("/graphe")
 def page_graphe():
+    if not GRAPHE_DISPONIBLE:
+        return "Page désactivée en mode allégé (VIZ_LIGHT).", 404
     return render_template("graphe.html",
                            lignes=LIGNES_DISPONIBLES,
                            types_relations=TYPES_RELATIONS,
@@ -777,6 +785,8 @@ def page_graphe():
 
 @app.route("/graphe_calcul")
 def page_graphe_calcul():
+    if not GRAPHE_DISPONIBLE:
+        return "Page désactivée en mode allégé (VIZ_LIGHT).", 404
     return render_template("graphe_calcul.html",
                            types_relations=TYPES_RELATIONS,
                            couleurs=COULEURS_RELATIONS)
@@ -1132,6 +1142,7 @@ def api_meta():
         "mode": mode if mode in DATASETS else "normal",
         "modes_disponibles": MODES_DISPONIBLES,
         "fusion_disponible": FUSION_DISPONIBLE,
+        "graphe_disponible": GRAPHE_DISPONIBLE,
         "conso_disponible": CONSO_DISPONIBLE,
         "simulation_disponible": SIMULATION_DISPONIBLE,
         "trajet_disponible": TRAJET_DISPONIBLE,

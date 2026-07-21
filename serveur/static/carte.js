@@ -866,6 +866,9 @@ function updateExtrasAvailability() {
   };
   hideIf("btnOpenConso", !meta.conso_disponible);
   hideIf("btnOpenSimulation", !meta.simulation_disponible);
+  // Pages Graphe / Graphe de calcul : désactivées en mode allégé VIZ_LIGHT.
+  hideIf("btnOpenGraph", meta.graphe_disponible === false);
+  hideIf("lnkGrapheWrap", meta.graphe_disponible === false);
 }
 
 // ===== Relief =====
