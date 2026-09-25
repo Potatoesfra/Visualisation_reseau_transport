@@ -319,9 +319,11 @@ class GrapheRoutier:
             return None
         return int(idx)
 
-    def plus_court_chemin(self, noeud_a, noeud_b):
+    def plus_court_chemin(self, noeud_a, noeud_b, distance_max=None):
         """Dijkstra pondéré par la distance. Renvoie une liste d'indices
-        d'arêtes ordonnée de a vers b, ou None si aucun chemin n'existe."""
+        d'arêtes ordonnée de a vers b, ou None si aucun chemin n'existe
+        (ou, avec `distance_max` en m, aucun chemin plus court : la recherche
+        s'arrête alors tôt, ce qui la garde locale)."""
         if noeud_a == noeud_b:
             return []
         dist = {noeud_a: 0.0}
@@ -332,7 +334,7 @@ class GrapheRoutier:
             d_cur, n_cur = heapq.heappop(file_prio)
             if n_cur in vus:
                 continue
-            if n_cur == noeud_b:
+            if n_cur == noeud_b or (distance_max is not None and d_cur > distance_max):
                 break
             vus.add(n_cur)
             for n_suiv, idx_arete in self._adj.get(n_cur, []):
@@ -345,6 +347,8 @@ class GrapheRoutier:
                     heapq.heappush(file_prio, (d_new, n_suiv))
 
         if noeud_b not in prev:
+            return None
+        if distance_max is not None and dist[noeud_b] > distance_max:
             return None
         chemin = []
         n = noeud_b

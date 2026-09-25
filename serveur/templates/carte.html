@@ -2,12 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <title>Carte — Relations entre segments</title>
+  <title>Outil d'exploration GTFS</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Fond de carte vectoriel OpenFreeMap (sans clé) : MapLibre 5.x (build UMD,
+       la 6.x est ESM uniquement) + plugin qui l'expose comme couche Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"/>
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=4">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=28">
 </head>
 <body>
 
@@ -16,10 +21,21 @@
   <!-- ============ SIDEBAR ============ -->
   <aside id="panel">
     <div>
-      <div class="panel-title">🗺️ Carte des segments</div>
-      <div class="panel-sub">
-        Vue géographique. Cliquez un segment pour le sélectionner (Ctrl+clic pour en ajouter).
-        <span id="lnkGrapheWrap">Synchro avec <a href="/graphe" target="_blank" style="color:var(--accent);">la vue graphe</a>.</span>
+      <div class="panel-title panel-title-ligne">🗺️ Outil d'exploration GTFS
+        <button type="button" class="sec-tout" id="btnReplierTout"
+                title="Replier toutes les sections">Tout replier</button>
+        <button type="button" class="sec-tout sec-reglages-btn" id="btnReglagesSections"
+                title="Réorganiser ou masquer les sections du panneau" aria-expanded="false"
+                aria-controls="secReglages">⚙</button>
+      </div>
+      <div id="secReglages" class="sec-reglages" hidden>
+        <div class="sec-reglages-titre">Sections du panneau
+          <span class="instructions">glisser ⋮⋮ ou ↑ ↓ pour réordonner · décocher pour masquer</span></div>
+        <ul id="secReglagesListe" class="sec-reglages-liste"></ul>
+        <div class="btn-row">
+          <button type="button" class="action-btn" id="btnSectionsDefaut">Réinitialiser</button>
+          <button type="button" class="action-btn primary" id="btnReglagesFermer">Fermer</button>
+        </div>
       </div>
     </div>
 
@@ -32,25 +48,23 @@
       <div class="instructions">« Fusion » : les segments partageant les mêmes arrêts de départ et d'arrivée (toutes lignes) sont regroupés en un seul nœud.</div>
     </div>
 
-    <div class="section">
+    <div class="section" id="secLignes">
       <div class="sec-label">Lignes</div>
       <select id="lineSelect" multiple></select>
-      <div class="instructions">Cliquez pour ajouter une ligne ; la croix ✕ sur une puce la retire.</div>
-    </div>
-
-    <div class="section">
-      <div class="sec-label">Parcours types</div>
+      <button type="button" class="action-btn" id="btnLignesAucune" disabled
+              title="Retire toutes les lignes de la sélection">Tout désélectionner</button>
+      <div class="instructions">Cliquez pour ajouter une ligne ; la croix ✕ sur une puce la retire.
+        Clic droit sur un segment : lignes qui lui sont liées.</div>
+      <div class="sous-label">Parcours types</div>
       <select id="parcoursSelect" multiple></select>
       <div class="instructions">Optionnel. Vide = tous les parcours des lignes choisies. Sinon, affine l'affichage à ces parcours (direction · destination, issus du GTFS).</div>
     </div>
 
-    <div class="section">
-      <div class="sec-label">Types de relations</div>
+    <div class="section" id="secRelations">
+      <div class="sec-label">Relations entre segments</div>
+      <div class="sous-label sous-label-premier">Types de relations</div>
       <div id="relTypeCheckboxes"></div>
-    </div>
-
-    <div class="section">
-      <div class="sec-label">Affichage</div>
+      <div class="sous-label">Affichage</div>
       <label class="chk-row">
         <input type="checkbox" id="chkShowStops" checked>
         Afficher les arrêts
@@ -65,7 +79,7 @@
       </label>
     </div>
 
-    <div class="section">
+    <div class="section" id="secCouches">
       <div class="sec-label">Fonds et couches</div>
       <label class="chk-row">
         <input type="checkbox" id="chkRelief">
@@ -79,7 +93,141 @@
       </label>
     </div>
 
-    <div class="section">
+    <div class="section" id="secEnergie">
+      <div class="sec-label">Prévision énergétique</div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkEnergie">
+        Colorer les segments selon la consommation
+      </label>
+      <div id="energiePanneau" class="energie-panneau" hidden>
+        <div class="energie-lib">Agrégation</div>
+        <div class="btn-row" role="group" aria-label="Agrégation">
+          <button type="button" class="action-btn" data-energie-agregation="segment"
+                  title="Chaque segment coloré selon la consommation moyenne d'un passage sur ce segment">Consommation par segment</button>
+          <button type="button" class="action-btn" data-energie-agregation="voyage"
+                  title="Toute la ligne (par direction) colorée selon la consommation moyenne d'un voyage complet">Consommation totale</button>
+        </div>
+        <div class="energie-lib">Unité</div>
+        <div class="btn-row" role="group" aria-label="Unité">
+          <button type="button" class="action-btn" data-energie-unite="kwh"
+                  title="Énergie totale sur l'unité d'agrégation (passage sur le segment, ou voyage)">kWh</button>
+          <button type="button" class="action-btn" data-energie-unite="kwhkm"
+                  title="Énergie rapportée à la distance parcourue">kWh/km</button>
+        </div>
+        <div class="energie-lib">Période</div>
+        <div class="energie-periode">
+          <label>De <select id="energieDe" aria-label="Premier mois"></select></label>
+          <label>à <select id="energieA" aria-label="Dernier mois"></select></label>
+        </div>
+        <div class="energie-prereglages" id="energiePrereglages"></div>
+        <label class="chk-row" title="Les segments très courts ou en forte descente donnent des kWh/km extrêmes qui écrasent l'échelle">
+          <input type="checkbox" id="chkEnergieRobuste">
+          Ignorer les valeurs extrêmes (2 % de chaque côté)
+        </label>
+        <label class="chk-row">
+          <input type="checkbox" id="chkEnergieReseau">
+          Échelle du réseau entier (sinon : lignes affichées)
+        </label>
+        <button type="button" class="action-btn" id="btnEnergieToutes"
+                title="Sélectionne toutes les lignes (section « Lignes »)">Afficher toutes les lignes</button>
+        <div id="energieStatut" class="instructions" role="status"></div>
+      </div>
+      <button class="action-btn" id="btnOpenConso">Ouvrir la consommation ⚡</button>
+      <div class="instructions">Estimation par le modèle physique road-load (traction + chauffage)
+        sur des voyages synthétiques construits à partir du GTFS et de données ouvertes : ce n'est pas une mesure.
+        Vert = consommation la plus faible, rouge = la plus élevée, sur les lignes affichées.
+        Astuce : décocher « Afficher les arrêts » pour mieux voir les couleurs.</div>
+    </div>
+
+    <div class="section" id="secTempsReel">
+      <div class="sec-label">Bus en temps réel</div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkBusTempsReel">
+        Afficher les bus (GTFS-RT STM)
+      </label>
+      <button class="action-btn" id="btnOuvrirTdb"
+              title="Tableau de bord de performance du réseau, en plein écran dans un nouvel onglet (réseau, lignes, écran partagé)">📊 Tableau de bord plein écran ⧉</button>
+      <div id="rtPanneau" class="rt-panneau" hidden>
+        <label class="chk-row">
+          <input type="checkbox" id="chkBusFiltre" checked>
+          Seulement les lignes / directions sélectionnées
+        </label>
+        <label class="chk-row">
+          <input type="checkbox" id="chkTdb" checked>
+          Tableau de bord (barre du bas)
+        </label>
+        <label class="chk-row">
+          <input type="checkbox" id="chkRegularite" checked>
+          Bus bunching et gaps de service
+        </label>
+        <label class="chk-row" title="Tracé estimé sur le réseau routier des bus sortis de leur tracé GTFS ; validé quand au moins 2 bus l'empruntent">
+          <input type="checkbox" id="chkDetours" checked>
+          Détours observés (tracé estimé)
+        </label>
+        <button class="action-btn" id="btnTracerDetour"
+                title="Dessiner un détour sur la carte (points reliés par les rues) : il est validé d'office">✏ Tracer un détour</button>
+        <div id="rtSourdines" class="rt-sourdines" hidden></div>
+        <button class="action-btn rt-btn-hors-trajet" id="btnBusHorsTrajet" aria-pressed="false"
+                title="Ne garder que les bus hors du tracé GTFS de leur trajet (détours)">⚠ Afficher hors trajet</button>
+        <div id="rtStatut" class="instructions"></div>
+        <div class="rt-legende">
+          <span><span class="legend-dot" style="background:#43a047;"></span>Places assises</span>
+          <span><span class="legend-dot" style="background:#fdd835;"></span>Peu de places</span>
+          <span><span class="legend-dot" style="background:#fb8c00;"></span>Debout</span>
+          <span><span class="legend-dot" style="background:#e53935;"></span>Plein</span>
+          <span><span class="legend-dot" style="background:#9e9e9e;"></span>Inconnu</span>
+          <span><span class="rt-detour-legende">⚠</span>Hors tracé (détour ?)</span>
+          <span><span class="rt-detour-legende rt-detour-valide">↪</span>Détour validé</span>
+          <span><span class="rt-trace-detour potentiel"></span>Détour potentiel (1 bus)</span>
+          <span><span class="rt-trace-detour valide"></span>Détour validé (≥ 2 bus)</span>
+          <span><span class="rt-train rt-train-legende">🚌×2</span>Bus bunching</span>
+          <span><span class="rt-trou-legende"></span>Gap de service</span>
+        </div>
+        <div class="instructions">Clic sur un bus = focus · Ctrl+clic = ajouter à la sélection.</div>
+        <div id="rtSelection" class="rt-selection" hidden>
+          <div class="rt-selection-titre" id="rtSelectionTitre">Bus sélectionnés</div>
+          <div id="rtSelectionListe"></div>
+          <label class="chk-row">
+            <input type="checkbox" id="chkBusTraces" checked>
+            Afficher leurs tracés
+          </label>
+          <label class="chk-row">
+            <input type="checkbox" id="chkBusSuivre">
+            Suivre (recadrer à chaque actualisation)
+          </label>
+          <label class="chk-row">
+            <input type="checkbox" id="chkBusMasquerAutres">
+            Masquer les autres bus
+          </label>
+          <button class="action-btn" id="btnBusDeselection">Désélectionner les bus</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="secHistorique">
+      <div class="sec-label">Historique</div>
+      <label class="chk-row" title="Continue d'interroger le flux STM même quand la couche des bus est masquée ou l'onglet en arrière-plan">
+        <input type="checkbox" id="chkHistorique" checked>
+        Enregistrer en continu (même couche masquée)
+      </label>
+      <div id="histoStatut" class="instructions"></div>
+      <div id="histoTypes" class="histo-types"></div>
+      <label class="chk-row">
+        <input type="checkbox" id="chkHistoLignes">
+        Seulement les lignes sélectionnées
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" id="chkHistoEnCours">
+        Seulement les événements en cours
+      </label>
+      <div id="histoListe" class="histo-liste"></div>
+      <div class="btn-row">
+        <button class="action-btn" id="btnHistoExport" title="Télécharger l'historique complet (CSV)">Exporter CSV</button>
+        <button class="action-btn" id="btnHistoVider" title="Oublier les événements terminés">Vider</button>
+      </div>
+    </div>
+
+    <div class="section" id="secTrajet">
       <div class="sec-label">Trajet personnalisé (modèle physique)</div>
       <button class="action-btn" id="btnOuvrirTrajet">🛠️ Outil de création de trajet</button>
       <div class="instructions">Construisez un trajet jalon par jalon (routage sur le
@@ -87,16 +235,16 @@
         exportez-le : il devient sélectionnable dans la liste des lignes.</div>
     </div>
 
-    <div class="section">
+    <div class="section" id="secActions">
       <div class="sec-label">Actions</div>
-      <button class="action-btn danger" id="btnClear">Effacer la sélection</button>
+      <button class="action-btn danger" id="btnClear"
+              title="Désélectionne les segments et les bus temps réel">Effacer la sélection</button>
       <button class="action-btn" id="btnFitSelection">Recadrer sur la sélection</button>
       <button class="action-btn" id="btnOpenGraph">Ouvrir le graphe ⧉</button>
-      <button class="action-btn" id="btnOpenConso">Ouvrir la consommation ⚡</button>
       <button class="action-btn" id="btnOpenSimulation">Ouvrir la simulation 🚌</button>
     </div>
 
-    <div class="section">
+    <div class="section" id="secStats">
       <div class="sec-label">Statistiques</div>
       <div class="stats-grid">
         <div class="k">Segments</div><div class="v" id="statTotalSeg">—</div>
@@ -126,6 +274,50 @@
     </div>
 
     <div id="map"></div>
+
+    <!-- Tableau de bord réseau (temps réel) : barre en bas de la zone carte, la
+         carte se réduit d'autant. Affichage : case « Tableau de bord » du panneau. -->
+    <div id="tdb" class="tdb" hidden>
+      <div class="tdb-detail" id="tdbDetail" hidden></div>
+      <div class="tdb-ligne">
+        <div class="tdb-entete">
+          <div class="tdb-titre">📊 Tableau de bord</div>
+          <div class="tdb-contexte"><span id="tdbPerimetre">réseau</span> · <span id="tdbHeure"></span>
+            <span class="tdb-info" id="tdbInfo" tabindex="0">ⓘ</span></div>
+        </div>
+        <div class="tdb-livraison" id="tdbLivraison">
+          <div class="tdb-livraison-valeur"><b id="tdbTaux">–</b> <span class="tdb-livraison-titre">service livré</span></div>
+          <div class="tdb-barre"><span id="tdbBarre"></span></div>
+          <div class="tdb-sous" id="tdbTauxDetail"></div>
+          <div class="tdb-sous" id="tdbLivraisonSous"></div>
+        </div>
+        <div class="tdb-grille" id="tdbGrille"></div>
+        <button type="button" class="tdb-fermer" id="tdbFermer" title="Masquer le tableau de bord">×</button>
+      </div>
+    </div>
+
+    <!-- Tracé manuel d'un détour (mode carte) -->
+    <div id="traceDetour" class="trace-detour" hidden>
+      <div class="trace-detour-titre">✏ Tracer un détour</div>
+      <label>Ligne <select id="traceDetourLigne"></select></label>
+      <label>Direction <select id="traceDetourDirection"></select></label>
+      <div class="trace-detour-aide" id="traceDetourAide">Cliquez les points du détour, de l'entrée à la sortie : le tracé suit les rues.</div>
+      <div class="btn-row">
+        <button type="button" class="action-btn" id="traceDetourRetour" title="Retirer le dernier point">↶ Dernier point</button>
+        <button type="button" class="action-btn primary" id="traceDetourOk" disabled>✔ Enregistrer</button>
+        <button type="button" class="action-btn" id="traceDetourAnnuler" title="Échap">✕ Annuler</button>
+      </div>
+    </div>
+
+    <!-- Avis temps réel (ex. aucune ligne sélectionnée n'a de véhicule en service) -->
+    <div id="rtAvis" class="rt-avis" role="status" aria-live="polite" hidden>
+      <span class="rt-avis-icone">🚌</span>
+      <div class="rt-avis-corps">
+        <div id="rtAvisTexte"></div>
+        <button class="action-btn rt-avis-action" id="rtAvisAction" hidden>⚠ Afficher seulement les bus hors trajet</button>
+      </div>
+      <button class="close-btn" id="rtAvisFermer" title="Fermer">×</button>
+    </div>
 
     <!-- Panneau d'info segment (bas-droite) -->
     <div id="seg-info-panel">
@@ -218,7 +410,11 @@
 </script>
 
 <script src="{{ url_for('static', filename='sync.js') }}?v=8"></script>
-<script src="{{ url_for('static', filename='carte.js') }}?v=17"></script>
+<script src="{{ url_for('static', filename='rt_commun.js') }}?v=6"></script>
+<script src="{{ url_for('static', filename='carte.js') }}?v=44"></script>
+<script src="{{ url_for('static', filename='energie_carte.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='detours_carte.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='visite_guidee.js') }}?v=7" data-page="carte" data-demarrage="{{ demarrage }}"></script>
 
 </body>
 </html>

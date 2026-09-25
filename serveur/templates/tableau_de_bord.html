@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau de bord — Réseau STM temps réel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=28">
+  <link rel="stylesheet" href="{{ url_for('static', filename='tableau_de_bord.css') }}?v=3">
+</head>
+<body class="tdbp">
+
+<header class="tdbp-barre">
+  <div class="tdbp-titre">📊 Tableau de bord du réseau <span>STM · temps réel</span></div>
+  <div class="tdbp-statut" id="tdbpStatut" role="status" aria-live="polite">Connexion au flux…</div>
+  <div class="tdbp-filtres" id="tdbpFiltres" hidden>
+    <span class="tdbp-filtres-texte" id="tdbpFiltresTexte"></span>
+    <button type="button" class="lien-discret" id="tdbpFiltresModifier" aria-haspopup="dialog">Modifier les filtres</button>
+  </div>
+  <form class="tdbp-ajout" id="tdbpAjout" autocomplete="off">
+    <input type="text" id="tdbpPerimetre" list="tdbpLignes"
+           placeholder="Réseau, ou lignes : 51, 80, 747" aria-label="Périmètre du nouveau panneau">
+    <datalist id="tdbpLignes"></datalist>
+    <button type="submit" class="action-btn primary">+ Panneau</button>
+  </form>
+  <div class="tdbp-outils">
+    <button type="button" class="action-btn" id="tdbpExport" title="Télécharger l'historique des événements depuis l'ouverture de la page (CSV)">Historique CSV</button>
+    <button type="button" class="action-btn" id="tdbpCarte" title="Ouvrir la carte dans un nouvel onglet">Carte ⧉</button>
+    <button type="button" class="action-btn" id="tdbpPleinEcran" title="Plein écran (Échap pour sortir)">⛶ Plein écran</button>
+    <span class="tdbp-info" tabindex="0" id="tdbpInfo">ⓘ</span>
+  </div>
+</header>
+
+{% if rt_disponible %}
+<main class="tdbp-grille" id="tdbpGrille"></main>
+{% else %}
+<main class="tdbp-indispo">
+  <p>Temps réel indisponible : le serveur n'a pas de clé d'API STM.</p>
+  <p class="instructions">Définir la variable d'environnement <code>STM_API_KEY</code>
+    (portail développeurs STM), puis relancer le serveur.</p>
+</main>
+{% endif %}
+
+<div class="menu-col tdbp-gestion" id="tdbpGestion" role="dialog" aria-label="Filtres et tris actifs" hidden></div>
+
+<script>const TDBP_RT_DISPONIBLE = {{ rt_disponible | tojson }};</script>
+<script src="{{ url_for('static', filename='rt_commun.js') }}?v=6"></script>
+<script src="{{ url_for('static', filename='tableau_de_bord.js') }}?v=8"></script>
+<script src="{{ url_for('static', filename='visite_guidee.js') }}?v=7" data-page="tableau_de_bord" data-demarrage="{{ demarrage }}"></script>
+</body>
+</html>

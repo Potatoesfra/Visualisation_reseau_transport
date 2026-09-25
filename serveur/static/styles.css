@@ -55,6 +55,9 @@ html, body {
   position: relative;
   background: var(--bg-dark);
   overflow: hidden;
+  /* Colonne : carte (flex: 1) puis, s'il est affiché, le tableau de bord en bas */
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== Titres et sections ===== */
@@ -90,6 +93,194 @@ html, body {
   font-weight: 600;
   margin-bottom: 2px;
 }
+
+/* Sous-titre à l'intérieur d'une section (ex. « Parcours types » dans « Lignes ») */
+.sous-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.sous-label.sous-label-premier { margin-top: 0; padding-top: 0; border-top: none; }
+
+/* Sections repliables (classes posées par carte.js) : clic sur le titre = replier / déplier */
+.sec-label.repliable {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  margin: -4px -6px 2px;
+  padding: 4px 6px;
+  border-radius: 5px;
+}
+.sec-label.repliable:hover,
+.sec-label.repliable:focus-visible { color: var(--text); background: rgba(255,255,255,0.05); outline: none; }
+.sec-label.repliable::before {
+  content: "▾";
+  font-size: 0.8rem;
+  transition: transform 0.15s;
+}
+.section.replie > .sec-label.repliable { margin-bottom: -4px; }
+.section.replie > .sec-label.repliable::before { transform: rotate(-90deg); }
+.section.replie > :not(.sec-label) { display: none !important; }
+.sec-resume {
+  margin-left: auto;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+.sec-resume:empty { display: none; }
+.panel-title-ligne { display: flex; align-items: center; gap: 8px; }
+.sec-tout {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sec-tout:hover { color: var(--text); border-color: var(--accent); }
+.sec-reglages-btn { margin-left: 0; font-size: 0.8rem; padding: 1px 6px; }
+.sec-reglages-btn.actif { color: var(--accent); border-color: var(--accent); }
+.section.masque-utilisateur { display: none !important; }
+
+/* Popover ⚙ : ordre et visibilité des sections */
+.sec-reglages {
+  margin-top: 8px;
+  background: var(--bg-element);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sec-reglages[hidden] { display: none; }
+.sec-reglages-titre { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.sec-reglages-titre .instructions { display: block; font-weight: 400; margin-top: 2px; }
+.sec-reglages-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.sec-reglage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  background: var(--bg-dark);
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+}
+.sec-reglage label { flex: 1; display: flex; align-items: center; gap: 6px; cursor: pointer; min-width: 0; }
+.sec-reglage label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sec-reglage em { color: var(--text-muted); font-size: 0.7rem; white-space: nowrap; }
+.sec-reglage input { accent-color: var(--accent); margin: 0; }
+.sec-reglage .poignee { cursor: grab; color: var(--text-muted); letter-spacing: -2px; user-select: none; }
+.sec-reglage button {
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.72rem;
+  width: 22px;
+  padding: 0;
+  cursor: pointer;
+}
+.sec-reglage button:disabled { opacity: 0.25; cursor: default; }
+.sec-reglage button:not(:disabled):hover { border-color: var(--accent); }
+.sec-reglage.glisse { opacity: 0.4; }
+.sec-reglage.cible-avant { border-top-color: var(--accent); }
+.sec-reglage.cible-apres { border-bottom-color: var(--accent); }
+
+/* Historique des événements temps réel */
+.histo-types { display: flex; flex-wrap: wrap; gap: 4px; }
+.histo-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  user-select: none;   /* double-clic = n'afficher que ce type, sans sélectionner le texte */
+  background: var(--bg-dark);
+  border: 1px solid var(--border-light);
+  border-radius: 11px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+.histo-type .n { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.histo-type[aria-pressed="false"] { opacity: 0.4; text-decoration: line-through; }
+.histo-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 45vh;
+  overflow-y: auto;
+  margin-right: -4px;
+  padding-right: 4px;
+}
+.histo-item {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  gap: 6px;
+  align-items: start;
+  text-align: left;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--histo-c, var(--border-light));
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  padding: 4px 6px;
+  cursor: pointer;
+  opacity: 0.62;
+}
+.histo-item.en-cours { opacity: 1; }
+.histo-item:hover { border-color: var(--accent); opacity: 1; }
+.histo-item .meta { display: block; color: var(--text-muted); font-size: 0.68rem; }
+.histo-item.en-cours .meta { color: var(--histo-c, var(--accent)); }
+.histo-heure { color: var(--text-muted); font-size: 0.68rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.histo-ico { text-align: center; }
+.histo-trou        { --histo-c: #ef5350; }
+.histo-train       { --histo-c: #ce93d8; }
+.histo-hors_trajet { --histo-c: #ffb300; }
+.histo-detour      { --histo-c: #fb8c00; }
+.histo-detour_1bus { --histo-c: #ce93d8; }
+/* Détour 1 bus retracé depuis l'historique (detours_carte.js) */
+.detour-ponctuel-banniere {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1050;
+  width: min(520px, calc(100% - 32px));
+  background: var(--bg-panel); color: var(--text); border: 1px solid #ab47bc; border-radius: 8px;
+  padding: 8px 12px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45); font-size: 0.78rem;
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px;
+}
+.detour-ponctuel-banniere b.titre { color: #ce93d8; }
+.detour-ponctuel-stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px 12px; }
+.detour-ponctuel-stats span { color: var(--text-muted); }
+.detour-ponctuel-stats b { color: var(--text); font-variant-numeric: tabular-nums; }
+.detour-ponctuel-legende { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--text-muted); font-size: 0.72rem; }
+.detour-ponctuel-legende i { display: inline-block; width: 20px; vertical-align: middle; margin-right: 4px; }
+.histo-fige        { --histo-c: #90a4ae; }
+.histo-depassement { --histo-c: #ff8a65; }
+.histo-plein       { --histo-c: #e53935; }
+.histo-annule      { --histo-c: #f06292; }
+.histo-ligne_sans  { --histo-c: #fdd835; }
+.histo-flux        { --histo-c: #4fc3f7; }
+.histo-type[aria-pressed="true"] { border-color: var(--histo-c); }
 
 /* ===== Contrôles ===== */
 
@@ -135,6 +326,354 @@ select option { padding: 3px; }
   flex-shrink: 0;
   border: 1px solid rgba(255,255,255,0.15);
 }
+
+/* Couche bus en temps réel (GTFS-RT) */
+.rt-panneau { margin: 2px 0 4px 22px; }
+.rt-panneau[hidden] { display: none; }
+
+/* Prévision énergétique (energie_carte.js) */
+.energie-panneau { margin: 2px 0 6px 22px; display: flex; flex-direction: column; gap: 4px; }
+.energie-panneau[hidden] { display: none; }
+.energie-lib { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+.energie-panneau .btn-row .action-btn { flex: 1; font-size: 0.74rem; padding-left: 4px; padding-right: 4px; }
+.energie-periode { display: flex; gap: 8px; font-size: 0.78rem; color: var(--text-muted); }
+.energie-periode select {
+  background: var(--bg-element); color: var(--text); border: 1px solid var(--border-light);
+  border-radius: 4px; font: inherit; padding: 1px 4px; margin-left: 2px;
+}
+.energie-prereglages { display: flex; flex-wrap: wrap; gap: 4px; }
+.energie-puce {
+  background: none; border: 1px solid var(--border-light); border-radius: 10px;
+  color: var(--text-muted); font: inherit; font-size: 0.7rem; padding: 1px 8px; cursor: pointer;
+}
+.energie-puce:hover { border-color: var(--accent); color: var(--text); }
+.energie-puce.actif { border-color: var(--accent); color: var(--text); background: rgba(79, 159, 255, 0.15); }
+#energieStatut.erreur { color: var(--warning); }
+
+.energie-legende {
+  background: rgba(37, 40, 64, 0.94);
+  color: #e8eaf6;
+  border: 1px solid #353a60;
+  border-radius: 6px;
+  padding: 7px 10px;
+  width: 250px;
+  font-size: 0.72rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.energie-legende-titre { font-weight: 700; margin-bottom: 4px; }
+.energie-degrade { height: 10px; border-radius: 3px; }
+.energie-bornes { display: flex; justify-content: space-between; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.energie-bornes span:nth-child(2) { color: #9fa8da; }
+.energie-legende-sous { color: #9fa8da; margin-top: 3px; line-height: 1.35; }
+.energie-tirets { display: inline-block; width: 18px; border-top: 2px dashed #9e9e9e; vertical-align: middle; }
+.energie-bulle { font-size: 0.74rem; line-height: 1.4; }
+.energie-bulle-sec { color: #616161; }
+.rt-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.rt-legende > span { display: inline-flex; align-items: center; gap: 4px; }
+.rt-statut-erreur { color: #e57373; font-style: normal; }
+/* Triangle « hors tracé » accolé au bus (divIcon non interactif) */
+.rt-detour {
+  font-size: 15px;
+  line-height: 1;
+  color: #ffb300;
+  text-shadow: 0 0 2px #000, 0 0 2px #000;
+  pointer-events: none;
+}
+.rt-detour-legende { color: #ffb300; font-size: 0.85rem; line-height: 1; }
+.rt-detour.rt-detour-valide, .rt-detour-legende.rt-detour-valide { color: #fb8c00; font-weight: 700; }
+/* Tracés estimés des détours : pointillés jaunes (1 bus), tirets orange (≥ 2 bus) */
+/* Actions manuelles sur les détours (detours_carte.js) */
+.detour-menu .action-btn { width: 100%; }
+.detour-menu-suppr { border: 1px solid var(--border); border-radius: 5px; padding: 4px 8px 8px; margin: 2px 0 0;
+                     display: flex; flex-direction: column; gap: 4px; }
+.detour-menu-suppr legend { color: var(--text-muted); font-size: 0.72rem; padding: 0 4px; }
+.detour-menu-suppr label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; cursor: pointer; line-height: 1.35; }
+.detour-menu-suppr input[type="radio"] { accent-color: var(--accent); }
+.detour-menu-suppr input.detour-minutes { width: 56px; min-width: 0; flex: 0 0 auto; margin: 0; background: var(--bg-element); color: var(--text); border: 1px solid var(--border-light);
+                  border-radius: 4px; font: inherit; padding: 0 4px; }
+.rt-sourdines { margin-top: 4px; padding: 5px 7px; border: 1px dashed var(--border-light); border-radius: 5px; font-size: 0.74rem; }
+.rt-sourdines[hidden] { display: none; }
+.rt-sourdines-titre { color: var(--text-muted); margin-bottom: 2px; }
+.rt-sourdine { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 1px 0; }
+.trace-detour {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1100;
+  width: min(460px, calc(100% - 32px));
+  background: var(--bg-panel); color: var(--text); border: 1px solid #fb8c00; border-radius: 8px;
+  padding: 8px 12px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.8rem;
+}
+.trace-detour[hidden] { display: none; }
+.trace-detour-titre { width: 100%; font-weight: 700; color: #fb8c00; }
+.trace-detour select { background: var(--bg-element); color: var(--text); border: 1px solid var(--border-light);
+                       border-radius: 4px; font: inherit; padding: 1px 4px; margin-left: 4px; }
+.trace-detour-aide { width: 100%; color: var(--text-muted); }
+.trace-detour-aide.erreur { color: var(--warning); }
+.trace-detour .btn-row { width: 100%; }
+.trace-detour .btn-row .action-btn { flex: 1; }
+.leaflet-container.trace-detour-actif, .leaflet-container.trace-detour-actif .leaflet-interactive { cursor: crosshair; }
+
+.rt-trace-detour { display: inline-block; width: 22px; height: 0; }
+.rt-trace-detour.potentiel { border-top: 3px dotted #fdd835; }
+.rt-trace-detour.valide { border-top: 4px dashed #fb8c00; }
+
+/* Menu du clic droit sur un segment : lignes liées */
+.seg-menu {
+  position: absolute;
+  z-index: 1200;
+  width: 300px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 8px 10px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.seg-menu-titre { font-weight: 700; color: var(--accent); display: flex; justify-content: space-between; gap: 8px; }
+.seg-menu-titre span { color: var(--text-muted); font-weight: 400; }
+.seg-menu-sous { color: var(--text-muted); font-size: 0.72rem; }
+.seg-menu-liste { display: flex; flex-direction: column; gap: 2px; }
+.seg-menu-ligne { display: flex; align-items: flex-start; gap: 6px; padding: 3px 4px; border-radius: 4px; cursor: pointer; }
+.seg-menu-ligne:hover { background: rgba(255, 255, 255, 0.05); }
+.seg-menu-ligne input { accent-color: var(--accent); margin: 2px 0 0; }
+.seg-menu-ligne b { min-width: 30px; }
+.seg-menu-ligne em { color: var(--text-muted); font-size: 0.7rem; }
+.seg-menu-types { display: flex; flex-wrap: wrap; gap: 3px; margin-left: auto; justify-content: flex-end; }
+.seg-menu-type { border-left: 3px solid; padding: 0 4px; font-size: 0.68rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.04); border-radius: 2px; }
+.seg-menu .btn-row .action-btn { flex: 1; }
+/* Bus bunching (pastille) et gaps de service (trait rouge pointillé) */
+.rt-train {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 9px;
+  background: #6a1b9a;
+  border: 1.5px solid #fff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+.rt-train-legende { font-size: 0.66rem; line-height: 1.2; padding: 0 4px; cursor: default; }
+.rt-trou-legende {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 3px dashed #e53935;
+}
+/* Avis temps réel : en bas au centre de la carte (le haut est occupé par le
+   bandeau flottant et les contrôles de zoom) */
+.rt-avis {
+  position: absolute;
+  bottom: calc(32px + var(--tdb-h, 0px));   /* au-dessus du tableau de bord s'il est affiché */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: min(460px, calc(100% - 32px));
+  padding: 10px 12px;
+  background: rgba(37, 40, 64, 0.97);
+  border: 1px solid var(--warning);
+  border-radius: 7px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.rt-avis[hidden] { display: none; }
+.rt-avis-icone { font-size: 1.1rem; line-height: 1.2; }
+.rt-avis-corps { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rt-avis-ligne + .rt-avis-ligne { margin-top: 4px; }
+.rt-avis-detours { margin: 2px 0 0; padding-left: 18px; color: var(--text-muted); }
+.rt-avis-action { align-self: flex-start; width: auto; }
+.rt-avis-action[hidden] { display: none; }
+/* Bouton bascule « Afficher hors trajet » (actif = classe primary) */
+.rt-btn-hors-trajet { margin: 4px 0 2px; }
+.rt-avis .close-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.rt-avis .close-btn:hover { color: var(--text); }
+
+/* ===== Tableau de bord réseau : barre en bas de la zone carte =====
+   #main-view passe en colonne : la carte (flex: 1) se réduit de la hauteur de la
+   barre au lieu d'être recouverte. --tdb-h (posée en JS) remonte les éléments
+   positionnés en bas (avis, panneau segment). */
+.tdb {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1000;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+.tdb[hidden] { display: none; }
+.tdb-ligne {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 8px 12px;
+}
+.tdb-entete { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.tdb-titre { font-weight: 700; color: var(--accent); white-space: nowrap; }
+.tdb-contexte { color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tdb-info { cursor: help; color: var(--text-dim); margin-left: 2px; }
+.tdb-livraison {
+  flex: 0 0 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+.tdb-livraison-titre { font-size: 0.72rem; color: var(--text-muted); }
+.tdb-livraison-valeur b { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.tdb-barre { height: 5px; margin: 3px 0; border-radius: 3px; background: var(--bg-element); overflow: hidden; }
+.tdb-barre span { display: block; height: 100%; width: 0; background: var(--success); transition: width 0.3s; }
+.tdb-barre.moyen span { background: var(--warning); }
+.tdb-barre.faible span { background: #e57373; }
+.tdb-sous { color: var(--text-muted); font-size: 0.68rem; line-height: 1.3; }
+.tdb-grille {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(108px, 1fr));   /* 11 tuiles : 2 rangées compactes */
+  gap: 6px;
+  min-width: 0;
+}
+.tdb-tuile {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 8px;
+  min-height: 34px;
+  background: var(--bg-element);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tdb-tuile:hover { border-color: var(--border-light); }
+.tdb-tuile .val { flex: 0 0 auto; min-width: 2ch; font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tdb-tuile .lib { font-size: 0.7rem; line-height: 1.2; color: var(--text-muted); }
+.tdb-tuile.alerte .val { color: var(--warning); }
+.tdb-tuile.ok .val { color: var(--success); }
+.tdb-tuile.active { border-color: var(--accent); background: rgba(79, 159, 255, 0.14); }
+.tdb-tuile:disabled { cursor: default; opacity: 0.7; }
+.tdb-fermer {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.tdb-fermer:hover { color: var(--text); }
+/* Détail d'une tuile « liste » : au-dessus de la barre, en colonnes */
+.tdb-detail {
+  max-height: 32vh;
+  overflow-y: auto;
+  padding: 8px 12px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.tdb-detail[hidden] { display: none; }
+.tdb-detail-titre {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 2px 0 4px;
+}
+.tdb-detail-liste { columns: 4 230px; column-gap: 12px; margin-bottom: 6px; }
+.tdb-item {
+  display: block;
+  width: 100%;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+  break-inside: avoid;
+}
+.tdb-item:hover { background: rgba(255, 255, 255, 0.07); }
+.tdb-item .meta { color: var(--text-muted); }
+.tdb-vide { color: var(--text-muted); font-style: italic; font-size: 0.74rem; margin-bottom: 6px; }
+
+@media (max-width: 1400px) {
+  .tdb-grille { grid-template-columns: repeat(4, minmax(108px, 1fr)); }
+}
+/* Barre étroite : le bloc de livraison passe au-dessus des tuiles */
+@media (max-width: 1100px) {
+  .tdb-ligne { flex-wrap: wrap; }
+  .tdb-livraison { flex-basis: auto; border-left: 0; padding-left: 0; }
+  .tdb-grille { flex-basis: 100%; order: 3; }
+}
+
+/* Sélection de bus (focus / Ctrl+clic) */
+.rt-selection {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(79, 159, 255, 0.35);
+  border-radius: 6px;
+  background: rgba(79, 159, 255, 0.06);
+}
+.rt-selection[hidden] { display: none; }
+.rt-selection-titre {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.rt-bus-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.rt-bus-item:hover { background: rgba(255, 255, 255, 0.07); }
+.rt-bus-item .rt-trait { width: 14px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+.rt-bus-item .rt-bus-meta { color: var(--text-muted); font-size: 0.72rem; }
 
 .legend-line {
   display: inline-block;
@@ -223,7 +762,8 @@ button.action-btn:disabled:hover {
 
 #map {
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   background: #f5f5f5;
 }
 
@@ -268,8 +808,8 @@ button.action-btn:disabled:hover {
 
 #seg-info-panel {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: calc(12px + var(--tdb-h, 0px));   /* au-dessus du tableau de bord s'il est affiché */
+  right: 58px;                              /* colonne du bouton « ? » (visite guidée) */
   z-index: 1000;
   background: rgba(37, 40, 64, 0.97);
   border: 1px solid var(--border);
@@ -982,3 +1522,112 @@ body.sidebar-collapsed #sync-status {
   overflow-y: auto;
 }
 .stat-seg-info .rel-block:first-child { margin-top: 0; }
+
+/* ===== Visite guidée (visite_guidee.js) ===== */
+.visite-btn {
+  position: absolute;
+  right: 12px;
+  bottom: calc(30px + var(--tdb-h, 0px));   /* au-dessus de l'attribution et du tableau de bord */
+  z-index: 1001;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: var(--bg-panel);
+  color: var(--accent);
+  font-family: inherit; font-weight: 700; font-size: 1.05rem; line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.visite-btn:hover, .visite-btn:focus-visible, .visite-btn.actif { background: var(--accent); color: #fff; outline: none; }
+.visite { position: fixed; inset: 0; z-index: 5000; pointer-events: none; }
+.visite[hidden] { display: none; }
+.visite-voile { position: absolute; inset: 0; width: 100%; height: 100%; }
+.visite-fond { fill: rgba(8, 10, 24, 0.62); }
+.visite-contour { fill: none; stroke: var(--accent); stroke-width: 2.5; animation: visite-pulse 1.6s ease-in-out infinite; }
+@keyframes visite-pulse { 50% { stroke-opacity: 0.35; stroke-width: 5; } }
+.visite-carte {
+  position: absolute;
+  pointer-events: auto;
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  transition: left 0.18s ease, top 0.18s ease;
+}
+.visite-entete { display: flex; align-items: center; justify-content: space-between; }
+.visite-etape { color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.visite-fermer { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; line-height: 1; padding: 0 2px; }
+.visite-fermer:hover { color: var(--text); }
+.visite-titre { margin: 4px 0 6px; font-size: 1.02rem; color: var(--accent); }
+.visite-texte p { margin: 0 0 7px; }
+.visite-texte ul { margin: 0 0 7px; padding-left: 18px; }
+.visite-texte li { margin-bottom: 2px; }
+.visite-points { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 10px; }
+.visite-point { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: none; background: var(--border-light); cursor: pointer; }
+.visite-point.actif { background: var(--accent); transform: scale(1.25); }
+.visite-pied { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 9px; }
+.visite-jamais { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.74rem; cursor: pointer; }
+.visite-boutons { display: flex; gap: 6px; justify-content: flex-end; }
+.visite-boutons .action-btn { width: auto; flex: 0 0 auto; margin: 0; }
+.visite-boutons .action-btn[hidden] { display: none; }
+#visitePasser { margin-right: auto; }
+.visite-btn.visite-btn-fixe { position: fixed; right: 16px; bottom: 16px; }
+.visite-apercu {
+  position: absolute;
+  pointer-events: auto;
+  width: min(440px, calc(100vw - 24px));
+  display: flex; flex-direction: column; gap: 10px;
+  transition: left 0.18s ease, top 0.18s ease;
+}
+.visite-apercu[hidden] { display: none; }
+.visite-apercu figure {
+  margin: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.visite-apercu img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.visite-apercu figcaption { color: var(--text-muted); font-size: 0.72rem; padding: 5px 2px 0; }
+/* Bulle « Pssst » après la visite : pointe vers le bouton « ? » */
+.visite-rappel {
+  position: fixed;
+  z-index: 4000;
+  max-width: 260px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transform-origin: calc(100% - 17px) 100%;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.visite-rappel[hidden] { display: none; }
+.visite-rappel.visible { opacity: 1; transform: none; }
+.visite-rappel::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  bottom: -7px;
+  border: 7px solid transparent;
+  border-bottom: 0;
+  border-top-color: var(--accent);
+}
+/* Panneau d'info segment : lignes liées (afficher / choisir) */
+.seg-liees { margin: 2px 0 6px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.seg-liees .btn-row { margin-top: 4px; gap: 6px; }
+.seg-liees .action-btn { padding: 4px 8px; font-size: 0.74rem; }

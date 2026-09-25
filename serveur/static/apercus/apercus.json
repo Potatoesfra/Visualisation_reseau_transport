@@ -1,0 +1,26 @@
+{
+ "tableau_de_bord": {
+  "date": "2026-09-25 15:34",
+  "simule": true
+ },
+ "graphe": {
+  "date": "2026-09-25 14:35",
+  "simule": false
+ },
+ "graphe_calcul": {
+  "date": "2026-09-25 14:35",
+  "simule": false
+ },
+ "consommation": {
+  "date": "2026-09-25 14:35",
+  "simule": false
+ },
+ "simulation": {
+  "date": "2026-09-25 14:35",
+  "simule": false
+ },
+ "carte": {
+  "date": "2026-09-25 15:04",
+  "simule": false
+ }
+}

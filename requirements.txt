@@ -9,4 +9,6 @@ matplotlib>=3.8
 scipy>=1.11
 tqdm>=4.66
 requests>=2.31
+gtfs-realtime-bindings>=1.0   # décodage des flux GTFS-Realtime STM (collecteur + couche temps réel)
+tzdata                        # fuseau America/Montreal garanti (horaire du tableau de bord), même sans base système
 gunicorn>=21.0    # serveur WSGI de production (déploiement PaaS ; non requis en local Windows)

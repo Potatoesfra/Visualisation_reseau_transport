@@ -35,6 +35,9 @@ import gzip
 import json
 import os
 import sys
+import threading
+import time
+from collections import deque
 from pathlib import Path
 
 import numpy as np
@@ -42,8 +45,20 @@ import pandas as pd
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from config import DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT, VIZ_LIGHT  # noqa: E402
+from config import (DATA_BRUTE, DATA_DERIVEE, GTFS_DIR, HOTE, PORT, VIZ_LIGHT, STM_API_KEY,  # noqa: E402
+                    DETOURS_ACTIONS)
 from modele_physique import profil_cinematique, GrapheRoutier  # noqa: E402
+
+# Temps réel GTFS-RT : optionnel (clé STM + bindings protobuf). Sans l'un ou
+# l'autre, la couche est simplement désactivée.
+try:
+    import gtfs_rt  # noqa: E402
+    _GTFS_RT_IMPORT_OK = True
+except ImportError:
+    _GTFS_RT_IMPORT_OK = False
+from service_prevu import ServicePrevu  # noqa: E402
+from regularite import Regularite  # noqa: E402
+from detours import SuiviDetours  # noqa: E402
 
 # geopandas / shapely ne sont importés que si les payloads doivent être
 # reconstruits : en mode statique (payloads pré-calculés), ~100 Mo de
@@ -107,6 +122,7 @@ PATH_PL_RELATIONS = DIR_PAYLOADS / "relations_normal.json.gz"
 PATH_PL_STOPS     = DIR_PAYLOADS / "stops.json.gz"
 PATH_PL_RESEAU    = DIR_PAYLOADS / "reseau_routier.json.gz"
 PATH_PL_META      = DIR_PAYLOADS / "meta_statique.json"
+PATH_PL_ENERGIE   = DIR_PAYLOADS / "energie_carte.json.gz"
 
 # Mode statique : en VIZ_LIGHT, si les payloads pré-calculés existent, ils sont
 # servis tels quels — aucune reconstruction, ni geopandas, ni pic de boot.
@@ -354,8 +370,11 @@ def build_dataset(path_segments, path_relations, path_centralite,
 
     lignes = sorted(segments["route_id"].unique(), key=lambda x: (len(x), x))
     types = sorted({r["type"] for r in relations_payload})
-    center = [float(segments.geometry.centroid.y.mean()),
-              float(segments.geometry.centroid.x.mean())]
+    # Centre initial de la carte : moyenne des centres des boîtes englobantes (un
+    # .centroid en lat/lon déclenche un UserWarning de GeoPandas ; écart négligeable ici)
+    b = segments.geometry.bounds
+    center = [float(((b["miny"] + b["maxy"]) / 2).mean()),
+              float(((b["minx"] + b["maxx"]) / 2).mean())]
     codes_utiles = set(segments["start_stop_code"]) | set(segments["end_stop_code"])
 
     print(f"    {len(segments_payload)} seg | {len(relations_payload)} rel "
@@ -747,6 +766,109 @@ def _conso_profil(df_sel, parcours, with_mean):
 
 
 # %% =============================================================
+# PRÉVISION ÉNERGÉTIQUE SUR LA CARTE — agrégats mensuels du modèle physique
+# ===============================================================
+# La carte colore les segments selon la consommation estimée par le modèle
+# road-load (p06), pour une plage de mois choisie côté client. On sert des
+# SOMMES mensuelles (additives) : le navigateur agrège n'importe quelle plage
+# sans rappeler le serveur, et le même fichier sert en mode statique (Render).
+#   segments : Σ Wh des passages et nombre de passages, par segment × mois ;
+#   parcours (ligne-direction) : Σ Wh et Σ km des voyages, nombre de voyages,
+#   par parcours × mois — unité « voyage » de la consommation totale.
+ENERGIE_JSON = None
+
+
+def _libelles_directions():
+    """(route_id, direction_id) -> libellé GTFS (« Nord », « Est »…), si disponible."""
+    if not PATH_DIRECTIONS.exists():
+        return {}
+    d = pd.read_csv(PATH_DIRECTIONS, dtype=str)
+    if not {"route_id", "direction_id", "direction"} <= set(d.columns):
+        return {}
+    return {(str(r.route_id), str(r.direction_id)): str(r.direction or "")
+            for r in d.itertuples(index=False)}
+
+
+def _construire_energie_carte(lc):
+    """Payload compact des agrégats mensuels (voir en-tête de section)."""
+    lc = lc[["voyage_id", "parcours_type", "route_id", "segment_id", "distance_m",
+             "mois", "temperature_C", _COL_CONSO]].dropna(subset=["mois", _COL_CONSO])
+    lc = lc.assign(mois=lc["mois"].astype(int), route_id=lc["route_id"].astype(str),
+                   parcours_type=lc["parcours_type"].astype(str))
+
+    # Parcours (ligne-direction) : un voyage = somme de ses segments
+    v = (lc.groupby("voyage_id")
+           .agg(parcours=("parcours_type", "first"), mois=("mois", "first"),
+                wh=(_COL_CONSO, "sum"), km=("distance_m", lambda s: s.sum() / 1000))
+           .reset_index())
+    pcs = sorted(v["parcours"].unique(), key=lambda x: (len(x), x))
+    i_pc = {p: i for i, p in enumerate(pcs)}
+    gp = v.groupby(["parcours", "mois"]).agg(wh=("wh", "sum"), km=("km", "sum"), n=("voyage_id", "count"))
+    P = len(pcs)
+    p_wh, p_km, p_n = np.zeros(P * 12), np.zeros(P * 12), np.zeros(P * 12, dtype=int)
+    gp = gp.reset_index()
+    k = gp["parcours"].map(i_pc).to_numpy() * 12 + gp["mois"].to_numpy() - 1
+    p_wh[k], p_km[k], p_n[k] = gp["wh"].to_numpy(), gp["km"].to_numpy(), gp["n"].to_numpy()
+    libs = _libelles_directions()
+    p_route = [p.rsplit("-", 1)[0] for p in pcs]
+    p_dir = [libs.get((p.rsplit("-", 1)[0], p.rsplit("-", 1)[-1]), "") for p in pcs]
+
+    # Segments : parcours majoritaire (26 segments sur ~15 800 en portent deux)
+    seg = (lc.groupby("segment_id")
+             .agg(route=("route_id", "first"), dist=("distance_m", "first"),
+                  parcours=("parcours_type", lambda s: s.value_counts().index[0])))
+    ids = seg.index.to_numpy()
+    i_seg = {s: i for i, s in enumerate(ids)}
+    gs = lc.groupby(["segment_id", "mois"]).agg(wh=(_COL_CONSO, "sum"), n=("voyage_id", "count"))
+    N = len(ids)
+    s_wh, s_n = np.zeros(N * 12), np.zeros(N * 12, dtype=int)
+    gs = gs.reset_index()
+    k = gs["segment_id"].map(i_seg).to_numpy() * 12 + gs["mois"].to_numpy() - 1
+    s_wh[k], s_n[k] = gs["wh"].to_numpy(), gs["n"].to_numpy()
+
+    t_mois = lc.drop_duplicates("voyage_id").groupby("mois")["temperature_C"].mean()
+    return {
+        "source": "Modèle physique road-load (pipeline/p06_conso_synthetique.py) : "
+                  "consommation synthétique traction + chauffage, aucune donnée mesurée.",
+        "temperature_mois": [_safe(t_mois.get(m), 1) for m in range(1, 13)],
+        "segments": {
+            "id": [int(s) for s in ids],
+            "route": seg["route"].tolist(),
+            "parcours": [i_pc[p] for p in seg["parcours"]],
+            "distance_m": [round(float(d), 1) for d in seg["dist"]],
+            "wh": np.round(s_wh).astype(int).tolist(),     # Σ Wh, [segment * 12 + mois - 1]
+            "n": s_n.tolist(),                              # passages
+        },
+        "parcours": {
+            "id": pcs, "route": p_route, "direction": p_dir,
+            "wh": np.round(p_wh).astype(int).tolist(),      # Σ Wh des voyages
+            "km": np.round(p_km, 3).tolist(),               # Σ km des voyages
+            "n": p_n.tolist(),                              # voyages
+        },
+    }
+
+
+def _energie_json(payload):
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+if VIZ_LIGHT and PATH_PL_ENERGIE.exists() and os.environ.get("VIZ_FORCE_CALCUL", "") != "1":
+    ENERGIE_JSON = _lire_gz_texte(PATH_PL_ENERGIE)
+elif CONSO_DISPONIBLE:
+    ENERGIE_JSON = _energie_json(_construire_energie_carte(_lc))
+elif PATH_CONSO.exists():
+    # Mode allégé sans payload pré-calculé : calcul ponctuel, parquet libéré aussitôt
+    _lce = pd.read_parquet(PATH_CONSO, columns=["voyage_id", "parcours_type", "route_id", "segment_id",
+                                                "distance_m", "mois", "temperature_C", _COL_CONSO])
+    ENERGIE_JSON = _energie_json(_construire_energie_carte(_lce))
+    del _lce
+    gc.collect()
+ENERGIE_DISPONIBLE = ENERGIE_JSON is not None
+if ENERGIE_DISPONIBLE:
+    print(f"Prévision énergétique (carte) : agrégats mensuels prêts ({len(ENERGIE_JSON) / 1e6:.1f} Mo JSON)")
+
+
+# %% =============================================================
 # SIMULATION — attributs physiques par segment (jeu normal)
 # ===============================================================
 SIM_ATTRS = None
@@ -837,6 +959,15 @@ app = Flask(__name__,
             static_folder="static")
 
 
+# Identifiant du lancement du serveur : la visite guidée de chaque page s'ouvre une fois par lancement
+SERVEUR_DEMARRAGE = str(int(time.time()))
+
+
+@app.context_processor
+def _contexte_pages():
+    return {"demarrage": SERVEUR_DEMARRAGE}   # visite_guidee.js (data-demarrage)
+
+
 @app.route("/")
 def page_carte():
     return render_template("carte.html",
@@ -879,10 +1010,24 @@ def page_simulation():
                            simulation_disponible=SIMULATION_DISPONIBLE)
 
 
+@app.route("/tableau_de_bord")
+def page_tableau_de_bord():
+    # Tableau de bord temps réel plein écran (sans carte) : n'utilise que /api/rt/vehicules
+    return render_template("tableau_de_bord.html", rt_disponible=RT_DISPONIBLE)
+
+
 # --- API Consommation -------------------------------------------------
 @app.route("/api/conso/options")
 def api_conso_options():
     return jsonify({**CONSO_OPTIONS, "disponible": CONSO_DISPONIBLE})
+
+
+@app.route("/api/energie/carte")
+def api_energie_carte():
+    # Agrégats mensuels pour colorer la carte (section « Prévision énergétique »)
+    if not ENERGIE_DISPONIBLE:
+        return jsonify({"error": "Prévision énergétique indisponible (lancer pipeline/p06_conso_synthetique.py)."}), 404
+    return app.response_class(ENERGIE_JSON, mimetype="application/json")
 
 
 @app.route("/api/conso/voyages")
@@ -1177,6 +1322,377 @@ def api_reseau_routier():
     return app.response_class(_RESEAU_ROUTIER_CACHE, mimetype="application/json")
 
 
+# --- Temps réel GTFS-RT (positions des bus STM) ------------------------
+# Proxy avec cache partagé, calé sur les versions du flux : la STM publie une
+# nouvelle version à intervalle régulier (~20 s, horodatée dans l'en-tête).
+# Le serveur apprend ce rythme (période médiane entre versions, délai minimal
+# entre l'horodatage et la mise en ligne) et n'appelle la STM qu'à l'échéance
+# de la prochaine version, puis toutes les RT_APPEL_MIN_S secondes tant qu'elle
+# n'est pas là. Chaque réponse indique à la page quand revenir (`prochain_ms`) :
+# la carte s'actualise dans les ~2 s qui suivent la publication, quel que soit
+# le nombre de visiteurs (un seul appel STM partagé). Pas de connexion tenue
+# ouverte (long-polling) : le serveur de démo n'a qu'un worker synchrone.
+# Si l'appel échoue, on ressert la dernière réponse connue (marquée « perime »)
+# tant qu'elle a moins de RT_PERIME_MAX_S secondes.
+RT_DISPONIBLE = _GTFS_RT_IMPORT_OK and bool(STM_API_KEY)
+RT_CACHE_S = 10          # sans horodatage de version : rappel toutes les 10 s
+RT_APPEL_MIN_S = 2       # attente d'une version en retard : un appel STM toutes les 2 s au plus
+RT_RETARD_LONG_S = 30    # version en retard de plus de 30 s (flux figé) : appels espacés…
+RT_APPEL_LENT_S = 10     # … à 10 s
+RT_CACHE_MAX_S = 30      # rappel de sécurité même si aucune version n'est attendue
+RT_PERIODE_DEFAUT_S = 20
+RT_PERIME_MAX_S = 300
+RT_CHAMPS = ["vehicule_id", "route_id", "trip_id", "direction", "lat", "lon", "cap",
+             "vitesse_kmh", "stop_id", "statut_arret", "occupation", "t_position",
+             "ecart_trace_m", "depassement_min", "detour", "detour_statut"]
+RT_ANNULATIONS_CACHE_S = 60      # tripUpdates pèse ~2 Mo : annulations rafraîchies à la minute
+RT_VUS_MEMOIRE_S = 6 * 3600      # trajets vus dans le flux, retenus 6 h (un bus qui finit
+                                 # en avance et enchaîne son trajet suivant reste « livré »)
+RT_DEPASSEMENT_SEUIL_S = 300     # bus signalé au-delà de 5 min après la fin prévue de son trajet
+PATH_REF_RT = DIR_PAYLOADS / "referentiel_rt.json.gz"
+# Projection locale équirectangulaire (m), identique à scripts/exporter_referentiel_rt.py
+_RT_KX = 111_320 * np.cos(np.radians(45.5))
+_RT_KY = 110_950
+
+
+def _charger_referentiel_rt():
+    """
+    Référentiel du GTFS EN VIGUEUR (scripts/exporter_referentiel_rt.py) :
+    trip_id -> (tracé, direction_id) et tracés en mètres. C'est lui qui donne la
+    direction fiable d'un bus (le direction_id du flux contredit le GTFS pour
+    ~30 % des trajets) et l'écart au tracé de SON trajet (détours).
+    """
+    if not PATH_REF_RT.exists():
+        print(f"  ⚠ {PATH_REF_RT.name} absent — direction et détours non calculés "
+              "(lancer scripts/exporter_referentiel_rt.py)")
+        return None
+    with gzip.open(PATH_REF_RT, "rt", encoding="utf-8") as f:
+        ref = json.load(f)
+    traces = []
+    for pts in ref["traces"]:
+        xy = np.asarray(pts, dtype=float)[:, ::-1] * (_RT_KX, _RT_KY)   # [lat, lon] -> [x, y] m
+        a = xy[:-1]
+        d = xy[1:] - a
+        traces.append((a, d, np.maximum((d * d).sum(axis=1), 1e-9)))
+    lignes = ref["trips"]
+    directions = {tuple(k.split("|")): v for k, v in ref["directions"].items()}
+    out = {
+        "version": ref.get("version"), "valide_au": ref.get("valide_au"),
+        "index": {r[0]: i for i, r in enumerate(lignes)},          # trip_id -> rang
+        "trace": np.array([r[1] for r in lignes], dtype=np.int32),
+        "dir": np.array([r[2] for r in lignes], dtype=np.int8),
+        "traces": traces,
+        "directions": directions,
+        "service": None,
+        "regularite": None,
+    }
+    # Horaire minimal (tableau de bord : service prévu vs réel), absent des
+    # référentiels antérieurs à son ajout.
+    if lignes and len(lignes[0]) >= 8:
+        out["service"] = ServicePrevu(out["index"], lignes, ref["services"], ref["calendrier"],
+                                      ref["exceptions"], ref["destinations"], directions)
+        # Bus bunching / gaps de service : tracés principaux + intervalles prévus
+        out["regularite"] = Regularite(out["service"], out["trace"], traces, _RT_KX, _RT_KY)
+    print(f"  Référentiel temps réel : GTFS {out['version']} (valide au {out['valide_au']}), "
+          f"{len(lignes):,} trajets, {len(traces)} tracés"
+          + ("" if out["service"] else " — sans horaire (régénérer pour le tableau de bord)"))
+    return out
+
+
+def _ecart_trace_m(trace, lat, lon):
+    """Distance (m) du point au tracé : minimum sur les tronçons du tracé."""
+    a, d, l2 = trace
+    x, y = lon * _RT_KX, lat * _RT_KY
+    t = np.clip(((x - a[:, 0]) * d[:, 0] + (y - a[:, 1]) * d[:, 1]) / l2, 0.0, 1.0)
+    return float(np.min(np.hypot(a[:, 0] + t * d[:, 0] - x, a[:, 1] + t * d[:, 1] - y)))
+
+
+RT_REF = _charger_referentiel_rt() if RT_DISPONIBLE else None
+_rt_cache = {"t": 0.0, "json": None, "t_ok": 0.0}
+_rt_verrou = threading.Lock()
+_rt_annulations = {"t": 0.0, "t_ok": 0.0, "trips": set()}
+_rt_vus = {}   # trip_id -> dernier instant où un véhicule le portait
+_rt_flux = None   # dernier flux décodé (t_collecte, t_flux, lignes) : réponse reconstruite après une action
+# Rythme de publication : dernière version, périodes entre versions, délais de mise en ligne
+_rt_versions = {"t_flux": None, "periodes": deque(maxlen=15), "delais": deque(maxlen=15)}
+# Détours observés : tracé estimé sur le réseau routier routable (p08), validé
+# quand au moins 2 bus l'empruntent (serveur/detours.py)
+RT_DETOURS = (SuiviDetours(GRAPHE_ROUTIER, RT_REF["traces"], _RT_KX, _RT_KY)
+              if RT_REF and GRAPHE_ROUTIER is not None else None)
+print("Temps réel GTFS-RT : " + (
+    "actif (proxy /api/rt/vehicules)" if RT_DISPONIBLE else
+    "désactivé (STM_API_KEY non définie)" if _GTFS_RT_IMPORT_OK else
+    "désactivé (pip install gtfs-realtime-bindings)"))
+
+
+def _rt_trips_annules(t):
+    """Trajets annulés (tripUpdates), rafraîchis à la minute. Renvoie (ensemble, à_jour)."""
+    if t - _rt_annulations["t"] >= RT_ANNULATIONS_CACHE_S:
+        _rt_annulations["t"] = t
+        contenu, http, duree_ms = gtfs_rt.telecharger_flux("trip_updates", STM_API_KEY)
+        try:
+            if contenu is None:
+                raise ValueError(f"HTTP {http}")
+            _rt_annulations["trips"] = gtfs_rt.decoder_annulations(contenu)
+            _rt_annulations["t_ok"] = t
+        except Exception as e:
+            print(f"  ⚠ GTFS-RT tripUpdates (annulations) : {e} ({duree_ms} ms)")
+    a_jour = t - _rt_annulations["t_ok"] <= 3 * RT_ANNULATIONS_CACHE_S
+    return _rt_annulations["trips"], a_jour
+
+
+def _rt_rafraichir():
+    """Interroge la STM et renvoie la chaîne JSON compacte, ou None si échec."""
+    t_collecte = int(time.time())
+    contenu, http, duree_ms = gtfs_rt.telecharger_flux("positions", STM_API_KEY)
+    if contenu is None:
+        print(f"  ⚠ GTFS-RT positions : HTTP {http} ({duree_ms} ms)")
+        return None
+    try:
+        t_flux, lignes = gtfs_rt.decoder_positions(contenu, t_collecte)
+    except Exception as e:   # flux corrompu : traité comme une panne
+        print(f"  ⚠ GTFS-RT positions illisible : {e}")
+        return None
+    global _rt_flux
+    _rt_flux = (t_collecte, t_flux, lignes)
+    _rt_noter_version(t_flux, time.time())
+    return _rt_construire(t_collecte, t_flux, lignes)
+
+
+def _rt_noter_version(t_flux, t_vu):
+    """Nouvelle version du flux (horodatage `t_flux`) vue à `t_vu` : période et délai de mise en ligne."""
+    v = _rt_versions
+    if not t_flux or t_flux == v["t_flux"]:
+        return
+    if v["t_flux"] is not None and 0 < t_flux - v["t_flux"] <= 120:
+        v["periodes"].append(t_flux - v["t_flux"])
+    v["delais"].append(t_vu - t_flux)   # peut être négatif (horloges STM / serveur décalées)
+    v["t_flux"] = t_flux
+
+
+def _rt_prochaine_version():
+    """Instant (horloge du serveur) où la prochaine version devrait être en ligne, ou None.
+    Le délai retenu est le plus court observé : c'est la version vue au plus près de sa
+    mise en ligne (les autres ont été vues en retard, faute d'appel au bon moment)."""
+    v = _rt_versions
+    if not v["t_flux"]:
+        return None
+    periode = float(np.median(v["periodes"])) if v["periodes"] else RT_PERIODE_DEFAUT_S
+    delai = min(v["delais"]) if v["delais"] else 0.0
+    return v["t_flux"] + min(max(periode, 5.0), 60.0) + min(max(delai, -30.0), 30.0)
+
+
+def _rt_intervalle(maintenant):
+    """(appel STM dû maintenant ?, secondes avant le prochain passage conseillé à la page)."""
+    depuis = maintenant - _rt_cache["t"]
+    prochaine = _rt_prochaine_version()
+    if prochaine is None:                          # pas d'horodatage : rythme fixe
+        return depuis >= RT_CACHE_S, max(RT_CACHE_S - depuis, 1.0)
+    if maintenant < prochaine:                     # version en cours encore valable
+        return depuis >= RT_CACHE_MAX_S, prochaine - maintenant + 0.3
+    pas = RT_APPEL_MIN_S if maintenant - prochaine < RT_RETARD_LONG_S else RT_APPEL_LENT_S
+    return depuis >= pas, max(pas - depuis, 0.0) + 0.2
+
+
+def _hhmm_service(s):
+    """Heure GTFS (secondes depuis minuit du jour de service, parfois > 24 h) -> « HH:MM »."""
+    s = int(s)
+    return f"{s // 3600 % 24:02d}:{s // 60 % 60:02d}"
+
+
+def _rt_construire(t_collecte, t_flux, lignes):
+    """Réponse JSON compacte de /api/rt/vehicules pour un flux décodé."""
+    sp = RT_REF["service"] if RT_REF else None
+    vehicules = []
+    bus_regularite = []   # bus rattachés à un trajet connu : ordonnés par ligne/direction
+    bus_detours = []      # mêmes bus, pour le suivi des sorties de tracé
+    inconnus = 0
+    for l in lignes:
+        if l["trip_id"]:
+            _rt_vus[l["trip_id"]] = t_collecte
+        if l["lat"] is None or l["lon"] is None:
+            continue
+        vit = l["vitesse_ms"]
+        direction = ecart = depassement = None
+        i = RT_REF["index"].get(l["trip_id"]) if RT_REF else None
+        if i is not None:
+            direction = RT_REF["directions"].get((l["route_id"], str(int(RT_REF["dir"][i]))))
+            ecart = round(_ecart_trace_m(RT_REF["traces"][RT_REF["trace"][i]], l["lat"], l["lon"]))
+            if sp is not None:
+                d = sp.depassement_s(i, l["start_date"], t_collecte)
+                if d is not None and d > RT_DEPASSEMENT_SEUIL_S:
+                    depassement = round(d / 60)
+            bus_regularite.append({"id": l["vehicule_id"], "route": l["route_id"],
+                                   "dir_id": int(RT_REF["dir"][i]), "direction": direction,
+                                   "lat": l["lat"], "lon": l["lon"]})
+            bus_detours.append({"id": l["vehicule_id"], "trip": l["trip_id"], "k": int(RT_REF["trace"][i]),
+                                "route": l["route_id"], "dir_id": int(RT_REF["dir"][i]),
+                                "direction": direction, "lat": l["lat"], "lon": l["lon"],
+                                "ecart": ecart, "t_position": l["t_position"],
+                                "trip_debut": _hhmm_service(sp.debut[i]) if sp is not None else None})
+        elif RT_REF:
+            inconnus += 1
+        vehicules.append([
+            l["vehicule_id"], l["route_id"], l["trip_id"], direction,
+            round(l["lat"], 5), round(l["lon"], 5),
+            None if l["cap"] is None else round(l["cap"]),
+            None if vit is None else round(vit * 3.6, 1),
+            l["stop_id"], l["statut_arret"], l["occupation"], l["t_position"], ecart, depassement,
+            None, None,   # détour (id, statut) : complétés ci-dessous
+        ])
+    for trip in [k for k, v in _rt_vus.items() if t_collecte - v > RT_VUS_MEMOIRE_S]:
+        del _rt_vus[trip]
+
+    referentiel = service = None
+    if RT_REF:
+        referentiel = {"version": RT_REF["version"], "valide_au": RT_REF["valide_au"],
+                       "trajets_inconnus": inconnus}
+    if sp is not None:
+        annules, annulations_ok = _rt_trips_annules(t_collecte)
+        service = sp.bilan(t_collecte, _rt_vus, annules)
+        service["annulations_ok"] = annulations_ok
+    detours = sourdines = ponctuels = None
+    if RT_DETOURS is not None:
+        try:
+            detours, statut_bus = RT_DETOURS.mettre_a_jour(t_collecte, bus_detours)
+            sourdines = RT_DETOURS.etat_sourdines(t_collecte)
+            ponctuels = RT_DETOURS.etat_ponctuels()
+            for v in vehicules:
+                if v[0] in statut_bus:
+                    v[-2], v[-1] = statut_bus[v[0]]
+        except Exception as e:   # le suivi des détours ne doit jamais couper le flux
+            print(f"  ⚠ Suivi des détours : {e!r}")
+    regularite = None
+    if RT_REF and RT_REF["regularite"] is not None:
+        # Les détours validés remplacent la portion du tracé qu'ils contournent :
+        # leurs bus sont placés et gaps de service et bus bunching suivent le parcours réel.
+        regularite = RT_REF["regularite"].analyser(t_collecte, bus_regularite,
+                                                    [d for d in (detours or []) if d["valide"]])
+    return json.dumps({"t_flux": t_flux, "t_collecte": t_collecte, "champs": RT_CHAMPS,
+                       "referentiel": referentiel, "service": service, "regularite": regularite,
+                       "detours": detours, "detours_sourdines": sourdines, "detours_ponctuels": ponctuels,
+                       "vehicules": vehicules},
+                      separators=(",", ":"), ensure_ascii=False)
+
+
+@app.route("/api/rt/vehicules")
+def api_rt_vehicules():
+    if not RT_DISPONIBLE:
+        return jsonify({"error": "Temps réel indisponible (STM_API_KEY non définie "
+                                 "ou gtfs-realtime-bindings absent)."}), 404
+    maintenant = time.time()
+    with _rt_verrou:   # une seule requête vers la STM à la fois, même sous charge
+        if _rt_intervalle(maintenant)[0]:
+            _rt_cache["t"] = maintenant
+            frais = _rt_rafraichir()
+            if frais is not None:
+                _rt_cache["json"], _rt_cache["t_ok"] = frais, maintenant
+        texte, age_ok = _rt_cache["json"], maintenant - _rt_cache["t_ok"]
+        attente = _rt_intervalle(time.time())[1]
+    if texte is None or age_ok > RT_PERIME_MAX_S:
+        return jsonify({"error": "Flux GTFS-RT STM injoignable pour l'instant."}), 503
+    # Quand revenir : juste après la publication attendue de la prochaine version
+    suite = f',"prochain_ms":{round(attente * 1000)}'
+    if age_ok > RT_CACHE_MAX_S + RT_APPEL_LENT_S:
+        suite += ',"perime":true'
+    return app.response_class(texte[:-1] + suite + "}", mimetype="application/json")
+
+
+# --- Détours : actions manuelles (clic droit sur un tracé de la carte) ------
+# État partagé (serveur) : la carte et le tableau de bord voient la même chose.
+# Après l'action, la réponse temps réel est reconstruite sur le dernier flux
+# reçu (sans rappeler la STM) : les pages voient le changement tout de suite.
+def _rt_action(action):
+    if RT_DETOURS is None:
+        return jsonify({"error": "Suivi des détours indisponible (référentiel temps réel ou graphe routier absent)."}), 404
+    if not DETOURS_ACTIONS:   # démo publique : l'état est partagé par tous les visiteurs
+        return jsonify({"error": "Actions sur les détours désactivées sur cette démo (lecture seule). "
+                                 "Elles sont disponibles en local."}), 403
+    corps = request.get_json(silent=True)
+    if corps is None:   # navigator.sendBeacon : corps texte
+        try:
+            corps = json.loads(request.get_data(as_text=True) or "{}")
+        except ValueError:
+            corps = {}
+    with _rt_verrou:
+        try:
+            resultat = action(corps, int(time.time()))
+        except (KeyError, ValueError, TypeError) as e:
+            return jsonify({"error": str(e.args[0]) if e.args else str(e)}), 400
+        if _rt_flux is not None:
+            _rt_cache["json"] = _rt_construire(*_rt_flux)
+    return jsonify({"ok": True, **(resultat or {})})
+
+
+def _dir_id(route, direction):
+    """direction_id GTFS d'une ligne à partir de son libellé (« Est »…)."""
+    for (r, di), lib in RT_REF["directions"].items():
+        if r == str(route) and lib == direction:
+            return int(di)
+    raise ValueError(f"Direction « {direction} » inconnue pour la ligne {route}.")
+
+
+@app.route("/api/rt/detours/valider", methods=["POST"])
+def api_rt_detour_valider():
+    return _rt_action(lambda c, t: {"id": RT_DETOURS.valider(c["id"], t)})
+
+
+@app.route("/api/rt/detours/supprimer", methods=["POST"])
+def api_rt_detour_supprimer():
+    return _rt_action(lambda c, t: RT_DETOURS.supprimer(c["id"], t, minutes=c.get("minutes"), session=c.get("session")))
+
+
+@app.route("/api/rt/detours/apercu", methods=["POST"])
+def api_rt_detour_apercu():
+    return _rt_action(lambda c, t: RT_DETOURS.apercu(c["points"]))
+
+
+@app.route("/api/rt/detours/tracer", methods=["POST"])
+def api_rt_detour_tracer():
+    def tracer(c, t):
+        route = str(c["route"])
+        return {"id": RT_DETOURS.tracer(route, _dir_id(route, c["direction"]), c["direction"],
+                                        c["points"], t, remplace=c.get("remplace"))}
+    return _rt_action(tracer)
+
+
+@app.route("/api/rt/detours/ponctuel/<ident>")
+def api_rt_detour_ponctuel(ident):
+    # Détour 1 bus archivé : trace GPS, tracé estimé et portion normale contournée (clic dans l'historique)
+    if RT_DETOURS is None:
+        return jsonify({"error": "Suivi des détours indisponible."}), 404
+    with _rt_verrou:
+        try:
+            return jsonify(RT_DETOURS.ponctuel(ident))
+        except KeyError as e:
+            return jsonify({"error": e.args[0]}), 404
+
+
+@app.route("/api/rt/detours/sourdines/lever", methods=["POST"])
+def api_rt_detour_lever_sourdine():
+    # {route, dir_id} : une sourdine ; {session} : celles d'une page fermée ou rechargée (sendBeacon)
+    return _rt_action(lambda c, t: RT_DETOURS.lever_sourdine(
+        route=c.get("route"), dir_id=c.get("dir_id"), session=c.get("session")))
+
+
+@app.route("/api/rt/trace")
+def api_rt_trace():
+    """Tracé GTFS (en vigueur) du trajet en cours d'un bus. `trace_id` permet au
+    client de ne dessiner qu'une fois un tracé partagé par plusieurs bus."""
+    if not RT_REF:
+        return jsonify({"error": "Référentiel temps réel absent "
+                                 "(lancer scripts/exporter_referentiel_rt.py)."}), 404
+    i = RT_REF["index"].get(request.args.get("trip", ""))
+    if i is None:
+        return jsonify({"error": "Trajet absent du référentiel GTFS "
+                                 "(nouveau GTFS publié ?)."}), 404
+    i_trace = int(RT_REF["trace"][i])
+    a, d, _ = RT_REF["traces"][i_trace]
+    xy = np.vstack([a, a[-1] + d[-1]])            # sommets du tracé, en mètres
+    coords = np.round(np.c_[xy[:, 1] / _RT_KY, xy[:, 0] / _RT_KX], 5).tolist()   # [lat, lon]
+    return jsonify({"trace_id": i_trace, "coords": coords})
+
+
 # --- API génériques ----------------------------------------------------
 # Chaînes JSON pré-sérialisées au démarrage (mode statique : décompressées
 # depuis les .json.gz pré-calculés ; sinon compactées depuis les objets
@@ -1221,9 +1737,12 @@ def api_meta():
         "fusion_disponible": FUSION_DISPONIBLE,
         "graphe_disponible": GRAPHE_DISPONIBLE,
         "conso_disponible": CONSO_DISPONIBLE,
+        "energie_disponible": ENERGIE_DISPONIBLE,
         "simulation_disponible": SIMULATION_DISPONIBLE,
         "trajet_disponible": TRAJET_DISPONIBLE,
         "relief_disponible": RELIEF_DISPONIBLE,
+        "rt_disponible": RT_DISPONIBLE,
+        "detours_actions": DETOURS_ACTIONS,
         "n_segments": ds["n_segments"],
         "n_relations": ds["n_relations"],
         "n_stops": N_STOPS,

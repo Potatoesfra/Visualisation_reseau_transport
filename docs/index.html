@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Outil d'exploration GTFS — réseau d'autobus de Montréal</title>
+  <meta name="description" content="Outil open source d'exploration GTFS / GTFS-Realtime du réseau d'autobus de Montréal : graphe de segments, suivi temps réel, prévision énergétique. 100 % données ouvertes.">
+  <meta property="og:title" content="Outil d'exploration GTFS — réseau d'autobus de Montréal">
+  <meta property="og:description" content="Graphe de 15 825 segments, suivi temps réel GTFS-RT, prévision énergétique. 100 % données ouvertes.">
+  <meta property="og:image" content="apercus/carte.jpg">
+  <!--
+    Page de présentation statique (GitHub Pages, dossier docs/) : s'affiche
+    instantanément, contrairement à la démo Render gratuite qui dort après
+    15 min d'inactivité. Dès l'ouverture, une requête réveille le serveur de
+    démo pendant la lecture ; le bouton indique quand elle est prête.
+    Captures : docs/apercus/ (copiées par scripts/capturer_apercus.py).
+  -->
+  <style>
+    :root {
+      --fond: #141830; --fond-2: #1a1f3a; --carte: #232845; --bord: #353a60;
+      --texte: #f3f5fb; --doux: #a8b0c4; --accent: #4f9fff; --accent-2: #6db4ff;
+      --vert: #6db86d; --ambre: #ffb74d;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--fond); color: var(--texte);
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    a { color: var(--accent-2); }
+    img { max-width: 100%; display: block; }
+    .conteneur { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+    /* En-tête */
+    header.hero {
+      background: radial-gradient(1200px 500px at 70% -10%, rgba(79,159,255,.18), transparent 60%), var(--fond-2);
+      border-bottom: 1px solid var(--bord);
+      padding-block: 56px 40px;
+    }
+    .surtitre { color: var(--accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; margin: 0 0 10px; }
+    h1 { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.12; margin: 0 0 16px; letter-spacing: -.01em; }
+    .accroche { font-size: 1.12rem; color: var(--doux); max-width: 62ch; margin: 0 0 26px; }
+    .accroche b { color: var(--texte); }
+    .chiffres { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 0 0 28px; padding: 0; list-style: none; }
+    .chiffres li { color: var(--doux); font-size: .92rem; }
+    .chiffres b { display: block; color: var(--texte); font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .bouton {
+      display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 10px;
+      font-weight: 700; text-decoration: none; border: 1px solid var(--accent); transition: background .15s, transform .15s;
+    }
+    .bouton.principal { background: var(--accent); color: #fff; }
+    .bouton.principal:hover { background: var(--accent-2); transform: translateY(-1px); }
+    .bouton.second { color: var(--accent-2); background: transparent; }
+    .bouton.second:hover { background: rgba(79,159,255,.12); }
+    .bouton[hidden] { display: none; }
+    .etat-demo { display: inline-flex; align-items: center; gap: 8px; color: var(--doux); font-size: .88rem; }
+    .etat-demo i { width: 9px; height: 9px; border-radius: 50%; background: var(--ambre); box-shadow: 0 0 0 0 rgba(255,183,77,.6); animation: pouls 1.4s infinite; }
+    .etat-demo.pret i { background: var(--vert); animation: none; }
+    .etat-demo.erreur i { background: #9e9e9e; animation: none; }
+    @keyframes pouls { 70% { box-shadow: 0 0 0 8px rgba(255,183,77,0); } 100% { box-shadow: 0 0 0 0 rgba(255,183,77,0); } }
+    .capture-principale {
+      margin-top: 36px; border-radius: 14px; overflow: hidden; border: 1px solid var(--bord);
+      box-shadow: 0 24px 60px rgba(0,0,0,.45);
+    }
+    .capture-principale img { width: 100%; height: auto; }
+
+    /* Sections */
+    section { padding-block: 56px 8px; }
+    h2 { font-size: 1.6rem; margin: 0 0 8px; }
+    .sous { color: var(--doux); margin: 0 0 26px; max-width: 70ch; }
+    .grille { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+    .pilier { background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; padding: 20px 20px 16px; }
+    .pilier h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    .pilier h3 span { margin-right: 8px; }
+    .pilier p { margin: 0; color: var(--doux); font-size: .94rem; }
+    .galerie { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); }
+    figure { margin: 0; background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; overflow: hidden; }
+    figure a { display: block; }
+    figure img { width: 100%; aspect-ratio: 880 / 550; object-fit: cover; object-position: top left; transition: transform .25s; }
+    figure a:hover img { transform: scale(1.02); }
+    figcaption { padding: 12px 14px 14px; font-size: .9rem; color: var(--doux); }
+    figcaption b { color: var(--texte); display: block; margin-bottom: 2px; }
+    .puces { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+    .puces li { border: 1px solid var(--bord); background: var(--carte); border-radius: 999px; padding: 4px 12px; font-size: .86rem; color: var(--doux); }
+    .deux-col { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+    .encart { background: var(--carte); border: 1px solid var(--bord); border-left: 3px solid var(--accent); border-radius: 10px; padding: 16px 18px; color: var(--doux); font-size: .94rem; }
+    .encart b { color: var(--texte); }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--bord); vertical-align: top; }
+    th { color: var(--doux); font-weight: 600; }
+    .tableau-defile { overflow-x: auto; }
+    footer { margin-top: 64px; padding-block: 28px; border-top: 1px solid var(--bord); color: var(--doux); font-size: .88rem; }
+    footer .conteneur { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+    .avertissement-pied { flex-basis: 100%; margin: 6px 0 0; font-size: .8rem; opacity: .85; }
+    .encart.avertissement { border-left-color: var(--ambre); }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="conteneur">
+    <p class="surtitre">Projet open source · 100 % données ouvertes</p>
+    <h1>Outil d'exploration GTFS<br>du réseau d'autobus de Montréal</h1>
+    <p class="accroche">Explorer, analyser et surveiller <b>en temps réel</b> un réseau de transport.
+      Le réseau de la STM devient un <b>graphe de segments</b> : le même graphe sert à estimer la
+      <b>consommation d'un bus électrique</b> et à mesurer la <b>fiabilité du service</b> à partir du flux GTFS-Realtime.</p>
+    <ul class="chiffres">
+      <li><b>15 825</b>segments d'arrêt à arrêt</li>
+      <li><b>105 653</b>relations typées</li>
+      <li><b>6</b>pages synchronisées</li>
+      <li><b>~2 s</b>après chaque version du flux</li>
+    </ul>
+    <div class="actions">
+      <a class="bouton principal" id="lienDemo" href="https://visualisation-reseau-transport.onrender.com" target="_blank" rel="noopener">▶ Ouvrir la démo</a>
+      <a class="bouton second" id="lienCode" href="#" target="_blank" rel="noopener" hidden>Code source sur GitHub</a>
+      <span class="etat-demo" id="etatDemo" role="status" aria-live="polite"><i></i><span>Réveil du serveur de démo…</span></span>
+    </div>
+    <div class="capture-principale">
+      <img src="apercus/carte.jpg" width="880" height="550"
+           alt="Carte de Montréal : dix lignes d'autobus colorées du vert au rouge selon la consommation estimée par segment, menu de réglages à gauche">
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="conteneur" aria-labelledby="t-demontre">
+    <h2 id="t-demontre">Ce que ce projet démontre</h2>
+    <p class="sous">Un outil complet, des données brutes jusqu'au produit en ligne.</p>
+    <div class="grille">
+      <article class="pilier">
+        <h3><span aria-hidden="true">🧱</span>Ingénierie de données ouvertes</h3>
+        <p>Pipeline reproductible qui croise GTFS, OpenStreetMap, MNT Copernicus, données de la Ville de Montréal
+          et normales climatiques en un graphe de segments attribué (pente, feux, vitesse, chaussée) et un graphe routier routable.</p>
+      </article>
+      <article class="pilier">
+        <h3><span aria-hidden="true">📡</span>Temps réel GTFS-RT</h3>
+        <p>Cache partagé calé sur le rythme de publication du flux STM ; service prévu vs livré,
+          <b>bus bunching</b>, <b>gaps de service</b>, <b>détours</b> estimés sur le réseau routier et validés rue par rue.</p>
+      </article>
+      <article class="pilier">
+        <h3><span aria-hidden="true">⚡</span>Modélisation physique</h3>
+        <p>Modèle <i>road-load</i> d'un bus électrique (traction, récupération, chauffage selon la température),
+          simulation seconde par seconde et prévision énergétique par segment et par ligne.</p>
+      </article>
+      <article class="pilier">
+        <h3><span aria-hidden="true">🗺️</span>Produit</h3>
+        <p>Carte interactive, graphe des relations, tableau de bord plein écran multi-panneaux (tris, filtres,
+          historique exportable), pages synchronisées entre onglets, visite guidée sur chaque page.</p>
+      </article>
+      <article class="pilier">
+        <h3><span aria-hidden="true">✅</span>Standards d'ingénierie</h3>
+        <p>Tests <code>pytest</code>, configuration par variables d'environnement, secret jamais versionné,
+          mode statique qui tient dans 512 Mo, démo publique en lecture seule.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="conteneur" aria-labelledby="t-pages">
+    <h2 id="t-pages">Les pages de l'outil</h2>
+    <p class="sous">Cliquez une capture pour l'agrandir. Toutes les pages se synchronisent : un segment choisi dans l'une est surligné dans les autres.</p>
+    <div class="galerie">
+      <figure>
+        <a href="apercus/carte.jpg" target="_blank" rel="noopener"><img src="apercus/carte.jpg" width="880" height="550" loading="lazy" alt="Carte des segments colorés selon la consommation"></a>
+        <figcaption><b>Carte d'exploration</b>Lignes, parcours, relations entre segments, relief, réseau routier, bus en temps réel, historique des événements.</figcaption>
+      </figure>
+      <figure>
+        <a href="apercus/tableau_de_bord.jpg" target="_blank" rel="noopener"><img src="apercus/tableau_de_bord.jpg" width="880" height="550" loading="lazy" alt="Tableau de bord du réseau : service livré, régularité, tuiles d'incidents, tableaux"></a>
+        <figcaption><b>Tableau de bord temps réel</b>Service livré, régularité, bus bunching et gaps de service, détours, panneaux côte à côte. <i>Capture générée sur un flux simulé.</i></figcaption>
+      </figure>
+      <figure>
+        <a href="apercus/consommation.jpg" target="_blank" rel="noopener"><img src="apercus/consommation.jpg" width="880" height="550" loading="lazy" alt="Histogramme de la consommation par segment d'un voyage"></a>
+        <figcaption><b>Consommation par segment</b>Par voyage, par mois ou par plage de température ; décomposition traction / auxiliaires.</figcaption>
+      </figure>
+      <figure>
+        <a href="apercus/simulation.jpg" target="_blank" rel="noopener"><img src="apercus/simulation.jpg" width="880" height="550" loading="lazy" alt="Profils de vitesse et de puissance seconde par seconde"></a>
+        <figcaption><b>Simulation d'un voyage</b>Profils vitesse et puissance seconde par seconde, lecture animée du bus sur la carte.</figcaption>
+      </figure>
+      <figure>
+        <a href="apercus/graphe.jpg" target="_blank" rel="noopener"><img src="apercus/graphe.jpg" width="880" height="550" loading="lazy" alt="Graphe des relations entre segments"></a>
+        <figcaption><b>Graphe des relations</b>Nœuds = segments, arêtes = relations typées, avec indicateurs de centralité.</figcaption>
+      </figure>
+      <figure>
+        <a href="apercus/graphe_calcul.jpg" target="_blank" rel="noopener"><img src="apercus/graphe_calcul.jpg" width="880" height="550" loading="lazy" alt="Arbre de voisinage d'un segment sur deux niveaux"></a>
+        <figcaption><b>Graphe de calcul</b>Arbre de voisinage d'un segment, niveau par niveau, extensible au clic droit.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="conteneur" aria-labelledby="t-donnees">
+    <div class="deux-col">
+      <div>
+        <h2 id="t-donnees">Données ouvertes uniquement</h2>
+        <p class="sous">Aucune donnée interne : tout est reproductible depuis des sources publiques.</p>
+        <div class="tableau-defile">
+          <table>
+            <thead><tr><th>Source</th><th>Usage</th></tr></thead>
+            <tbody>
+              <tr><td>GTFS et GTFS-Realtime (STM, CC-BY 4.0)</td><td>tracés, arrêts, horaires ; positions et occupation des bus</td></tr>
+              <tr><td>OpenStreetMap (ODbL)</td><td>attributs routiers, graphe routier routable</td></tr>
+              <tr><td>MNT Copernicus GLO-30</td><td>altitudes, pentes, relief</td></tr>
+              <tr><td>Données ouvertes de Montréal</td><td>feux de circulation, état des chaussées</td></tr>
+              <tr><td>Normales climatiques ECCC</td><td>températures mensuelles</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="encart avertissement" style="margin-top:18px"><b>Avertissement —</b> Application développée à titre de projet de formation en développement web. Il ne s'agit pas d'une application officielle de la STM et elle n'est ni affiliée, ni approuvée par la STM. Données GTFS-realtime fournies par la Société de transport de Montréal (STM) sous licence CC-BY 4.0. Ces données sont fournies « telles quelles », sans garantie d'exactitude ou de disponibilité.</p>
+      </div>
+      <div>
+        <h2>Technologies</h2>
+        <p class="sous">Python pour les données et le serveur, JavaScript côté client.</p>
+        <ul class="puces">
+          <li>Python</li><li>Flask</li><li>pandas</li><li>GeoPandas</li><li>Shapely</li><li>SciPy</li>
+          <li>rasterio</li><li>GTFS / GTFS-Realtime</li><li>Protocol Buffers</li><li>Leaflet</li>
+          <li>MapLibre</li><li>Cytoscape.js</li><li>Plotly</li><li>pytest</li><li>Render</li>
+        </ul>
+        <p class="encart" style="margin-top:22px"><b>À noter —</b> les consommations sont <b>estimées par un modèle
+          physique</b> documenté, pas mesurées : elles illustrent les ordres de grandeur et la mécanique d'analyse.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="conteneur" lang="en" aria-labelledby="t-en">
+    <h2 id="t-en">In English</h2>
+    <p class="sous" style="max-width:80ch">An open-source GTFS / GTFS-Realtime exploration tool for the Montréal (STM) bus
+      network, built exclusively on open data. It models the network as a graph of stop-to-stop segments with typed
+      relations, estimates electric-bus energy use with a physics-based road-load model, and monitors live service
+      (delivered vs scheduled trips, bus bunching, service gaps, detours inferred on the road network) from the STM
+      GTFS-Realtime feed. The user interface is in French.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="conteneur">
+    <span>© 2026 Lucas Adam · code sous licence MIT · données sous la licence de leurs sources</span>
+    <span>La démo gratuite peut mettre 30 à 60 s à démarrer.</span>
+  <p class="avertissement-pied">Application développée à titre de projet de formation en développement web. Il ne s'agit pas d'une application officielle de la STM et elle n'est ni affiliée, ni approuvée par la STM. Données GTFS-realtime fournies par la Société de transport de Montréal (STM) sous licence CC-BY 4.0. Ces données sont fournies « telles quelles », sans garantie d'exactitude ou de disponibilité.</p>
+  </div>
+</footer>
+
+<script>
+  // Démo Render gratuite : le serveur dort après 15 min d'inactivité. Une requête
+  // le réveille pendant que le visiteur lit cette page ; la réponse (opaque, en
+  // mode no-cors) n'arrive qu'une fois le serveur démarré.
+  const DEMO = "https://visualisation-reseau-transport.onrender.com";
+  const etat = document.getElementById("etatDemo");
+  const texte = etat.querySelector("span");
+  let pret = false;
+  async function reveiller(essai = 1) {
+    try {
+      await fetch(`${DEMO}/api/meta?reveil=${Date.now()}`, { mode: "no-cors", cache: "no-store" });
+      pret = true;
+      etat.className = "etat-demo pret";
+      texte.textContent = "Démo prête";
+    } catch (e) {
+      if (essai < 6) setTimeout(() => reveiller(essai + 1), 10000);
+      else { etat.className = "etat-demo erreur"; texte.textContent = "Démo injoignable pour l'instant"; }
+    }
+  }
+  reveiller();
+  setTimeout(() => { if (!pret && !etat.classList.contains("erreur")) texte.textContent = "Réveil du serveur… (jusqu'à une minute)"; }, 6000);
+
+  // Lien vers le code : déduit de l'adresse GitHub Pages (<compte>.github.io/<dépôt>/)
+  const [compte] = location.hostname.split(".");
+  const depot = location.pathname.split("/").filter(Boolean)[0];
+  if (location.hostname.endsWith("github.io") && depot) {
+    const lien = document.getElementById("lienCode");
+    lien.href = `https://github.com/${compte}/${depot}`;
+    lien.hidden = false;
+  }
+</script>
+</body>
+</html>

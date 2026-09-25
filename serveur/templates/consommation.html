@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Consommation — segment par segment</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=28">
 </head>
 <body>
 
@@ -127,6 +127,7 @@
 
 <script src="{{ url_for('static', filename='sync.js') }}?v=7"></script>
 <script src="{{ url_for('static', filename='consommation.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='visite_guidee.js') }}?v=7" data-page="consommation" data-demarrage="{{ demarrage }}"></script>
 
 </body>
 </html>

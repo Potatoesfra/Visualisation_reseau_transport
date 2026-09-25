@@ -35,3 +35,14 @@ PORT = int(os.environ.get("VIZ_PORT", _PORT_PAAS or "5000"))
 # aussi la SIMULATION, qui en dépend). Le serveur tombe alors sous ~450 Mo. Non
 # défini en local → toutes les fonctionnalités restent chargées.
 VIZ_LIGHT = os.environ.get("VIZ_LIGHT", "0").strip().lower() not in ("", "0", "false", "no", "off")
+
+# Clé de l'API GTFS-Realtime STM (portail développeurs, gratuite). Absente →
+# couche « bus en temps réel » désactivée, le reste de l'app fonctionne. Ne
+# jamais la versionner : variable d'environnement locale / secret sur l'hébergeur.
+STM_API_KEY = os.environ.get("STM_API_KEY", "").strip()
+
+# Actions manuelles sur les détours (valider, supprimer, sourdine, tracer) : elles
+# modifient l'état partagé par tous les visiteurs. Autorisées en local, en LECTURE
+# SEULE par défaut sur un hébergeur public ($PORT défini). VIZ_DETOURS_ACTIONS=1/0 force.
+_actions = os.environ.get("VIZ_DETOURS_ACTIONS", "").strip().lower()
+DETOURS_ACTIONS = (_actions not in ("0", "false", "no", "off")) if _actions else not _PORT_PAAS

@@ -52,6 +52,8 @@ def main():
     _ecrire_gz(sv.PATH_PL_RELATIONS, ds["relations_json"])
     _ecrire_gz(sv.PATH_PL_STOPS,     sv.STOPS_JSON)
     _ecrire_gz(sv.PATH_PL_RESEAU,    sv._construire_reseau_routier_json())
+    if sv.ENERGIE_JSON is not None:   # prévision énergétique de la carte (modèle physique, p06)
+        _ecrire_gz(sv.PATH_PL_ENERGIE, sv.ENERGIE_JSON)
 
     meta = {
         "lignes":          sv.LIGNES_DISPONIBLES,

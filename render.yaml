@@ -28,3 +28,10 @@ services:
         value: "1"
       - key: PYTHONUNBUFFERED
         value: "1"
+      # Détours en lecture seule sur la démo publique (défaut sur un hébergeur ; explicite ici)
+      - key: VIZ_DETOURS_ACTIONS
+        value: "0"
+      # Clé API GTFS-Realtime STM : secret saisi dans le tableau de bord Render
+      # (jamais versionné). Absente → couche « bus en temps réel » désactivée.
+      - key: STM_API_KEY
+        sync: false
