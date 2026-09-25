@@ -265,11 +265,28 @@ function elementsVisite(cibles) {
                        .filter(el => el && el.getClientRects().length);
 }
 
+// Toute première étape, sur chaque page : provenance des données et statut non officiel
+const VISITE_AVERTISSEMENT = {
+  titre: "Avant de commencer",
+  etape: "Avertissement",
+  bouton: "J'ai compris ›",
+  cibles: [],
+  texte: `<p>Application développée à titre de <b>projet de formation en développement web</b>. Il ne s'agit
+      <b>pas d'une application officielle de la STM</b> : elle n'est ni affiliée, ni approuvée par la STM.</p>
+    <p>Les <b>données temps réel</b> (positions et occupation des bus, annulations) proviennent de
+      l'<b>API GTFS-Realtime de la Société de transport de Montréal (STM)</b>, fournies sous licence
+      <b>CC-BY 4.0</b>. Ces données sont fournies « telles quelles », sans garantie d'exactitude ou de disponibilité.</p>
+    <p>Les autres données sont elles aussi ouvertes (GTFS de la STM, OpenStreetMap sous ODbL, MNT Copernicus,
+      données de la Ville de Montréal, normales climatiques ECCC). Les consommations d'énergie sont
+      <b>estimées par un modèle physique</b>, pas mesurées. Le code est sous licence MIT.</p>`,
+};
+
 function pagesVisite() {
   const def = VISITE_DEFINITIONS[VISITE_PAGE];
   const pages = def ? def() : [];
   // Étapes dont aucune cible n'est affichée (section absente ou masquée) : sautées, sauf l'introduction
-  return pages.filter((p, i) => i === 0 || !p.cibles?.length || elementsVisite(p.cibles).length);
+  return [VISITE_AVERTISSEMENT,
+          ...pages.filter((p, i) => i === 0 || !p.cibles?.length || elementsVisite(p.cibles).length)];
 }
 
 function construireVisite() {
@@ -419,14 +436,14 @@ function allerPageVisite(i) {
   } else {
     elementsVisite(p.cibles)[0]?.scrollIntoView({ block: "nearest" });
   }
-  document.getElementById("visiteEtape").textContent = i === 0 ? "Visite guidée" : `Étape ${i + 1} sur ${VISITE.pages.length}`;
+  document.getElementById("visiteEtape").textContent = p.etape || (i <= 1 ? "Visite guidée" : `Étape ${i} sur ${VISITE.pages.length - 1}`);
   document.getElementById("visiteTitre").textContent = p.titre;
   document.getElementById("visiteTexte").innerHTML = p.texte;
   document.getElementById("visitePoints").innerHTML = VISITE.pages.map((q, j) =>
     `<button type="button" class="visite-point${j === i ? " actif" : ""}" data-page="${j}" title="${q.titre}" aria-label="${q.titre}"></button>`).join("");
   document.getElementById("visitePrecedent").disabled = i === 0;
   const dernier = i === VISITE.pages.length - 1;
-  document.getElementById("visiteSuivant").textContent = dernier ? "Terminer" : i === 0 ? "Commencer la visite ›" : "Suivant ›";
+  document.getElementById("visiteSuivant").textContent = p.bouton || (dernier ? "Terminer" : i === 1 ? "Commencer la visite ›" : "Suivant ›");
   document.getElementById("visitePasser").hidden = dernier;
   majApercuVisite();
   VISITE.signature = "";

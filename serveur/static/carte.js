@@ -1825,7 +1825,7 @@ function infobulleRegularite(r) {
     html += `<br>Bus devant : ${r.devant_min != null ? fmtMin(r.devant_min) : "—"} · ` +
             `derrière : ${r.derriere_min != null ? fmtMin(r.derriere_min) : "—"}`;
   }
-  if (r.train) html += `<br><b style="color:#ce93d8">🚌 En train de bus</b>`;
+  if (r.train) html += `<br><b style="color:#ce93d8">🚌 Bus bunching</b>`;
   if (r.trou_devant) html += `<br><b style="color:#ef9a9a">Gap de service devant ce bus</b>`;
   return html;
 }

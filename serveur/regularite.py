@@ -12,7 +12,7 @@ de maintenant), puis rapporté à l'intervalle prévu (écart médian entre dép
 prévus autour de maintenant) :
 
   rapport = écart observé / intervalle prévu
-  train de bus     rapport < SEUIL_TRAIN  (bunching : définition usuelle 25 %)
+  bus bunching     rapport < SEUIL_TRAIN  (définition usuelle : 25 % de l'intervalle)
   gap de service   rapport > SEUIL_TROU
   indice de régularité d'une ligne/direction : part des écarts dont le
   rapport est dans [0,5 ; 1,5] (au moins 2 écarts, soit 3 bus placés).
