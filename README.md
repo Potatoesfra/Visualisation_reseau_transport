@@ -3,7 +3,7 @@
 **Explorer, analyser et surveiller en temps réel un réseau de transport, à partir
 de données 100 % ouvertes.** Le réseau de la STM est découpé en 15 825 segments
 reliés par 105 653 relations typées ; le même graphe sert à estimer la
-consommation d'énergie d'un bus électrique et à mesurer la fiabilité du service
+consommation d'énergie d'un bus électrique pour propager l'information de segment sur des nouvelles lignes les réutilisant (Article en cours d'évaluation dans Transportation Research Part C) et à mesurer la fiabilité du service
 en temps réel (GTFS-Realtime).
 
 **▶ Présentation : <https://potatoesfra.github.io/Visualisation_reseau_transport/>**
@@ -18,9 +18,9 @@ que le serveur se réveille)*
 | Tableau de bord temps réel | Consommation par segment |
 |---|---|
 | ![Tableau de bord du réseau](serveur/static/apercus/tableau_de_bord.jpg) | ![Consommation simulée segment par segment](serveur/static/apercus/consommation.jpg) |
-| *Aperçu généré sur un flux temps réel simulé (`scripts/capturer_apercus.py`)* | *Modèle physique road-load : estimation, pas une mesure* |
+| *Aperçu généré sur un flux temps réel simulé* | *Modèle physique road-load : estimation, pas une mesure* |
 
-## Ce que ce projet démontre
+## Ce que ce projet présente
 
 - **Ingénierie de données ouvertes** — pipeline reproductible (`pipeline/p01`→`p08`)
   qui croise GTFS, OpenStreetMap, MNT Copernicus, données ouvertes de Montréal et
@@ -75,10 +75,10 @@ chaussée) et énergétiques (modèle physique *road-load* d'un bus).
 |---|---|---|
 | Outil d'exploration (carte) | `/` | Carte Leaflet : segments, relations, arrêts, overlay relief, **réseau routier routable**, **bus en temps réel** (GTFS-RT STM, colorés par occupation, restreints automatiquement aux lignes/directions sélectionnées — avec un avis si aucun véhicule n'y circule ou si des bus y sont hors trajet —, ⚠ si hors du tracé GTFS de leur trajet, bouton « Afficher hors trajet » pour ne garder que les détours ; clic = focus sur un bus, Ctrl+clic = multi-sélection, avec affichage des tracés de leurs trajets et suivi), **tableau de bord réseau** (service prévu vs réel : voyages livrés, annulés, sans véhicule ; bus hors trajet, en dépassement, pleins, figés), **outil de création de trajet** (routage sur le réseau routier réel + estimation d'énergie) |
 | Graphe | `/graphe` | Graphe abstrait Cytoscape : nœuds = segments, arêtes = relations typées |
-| Graphe de calcul | `/graphe_calcul` | Arbre de voisinage avec moteur physique |
+| Graphe de calcul | `/graphe_calcul` | Arbre de voisinage avec moteur physique de répulsion entre nodes |
 | Consommation | `/consommation` | Profils de consommation simulée par segment (Plotly) : par voyage, par mois ou par plage de température |
-| Simulation | `/simulation` | Profil vitesse / puissance seconde par seconde d'un voyage, avec **lecture animée** |
-| Tableau de bord | `/tableau_de_bord` | Tableau de bord temps réel plein écran : panneaux réseau ou lignes côte à côte, indicateurs, courbes, tableaux triables et filtrables, historique CSV |
+| Simulation | `/simulation` | Profil vitesse / puissance seconde par seconde d'un voyage, avec **lecture animée** sur le tracé GTFS statique|
+| Tableau de bord | `/tableau_de_bord` | Tableau de bord temps réel plein écran : panneaux réseau ou lignes côte à côte, indicateurs, courbes, tableaux triables et filtrables, export historique en CSV |
 
 **Visite guidée** : sur chaque page, un « tour du propriétaire » s'ouvre une fois
 par lancement du serveur (passable, ou « Ne plus l'afficher ») : une page sur
@@ -197,7 +197,7 @@ Le serveur lit ses variables d'environnement via `config.py` :
 | `PORT` | port imposé par un PaaS (Render, Heroku…) : bascule automatiquement l'écoute sur `0.0.0.0:$PORT` | — |
 | `VIZ_LIGHT` | `1` = mode allégé (saute fusion + consommation + simulation, désactive Graphe/Graphe de calcul) | non défini |
 | `VIZ_FORCE_CALCUL` | `1` = force la reconstruction dynamique même si les payloads statiques existent (utilisé par l'exporteur, sinon inutile) | non défini |
-| `STM_API_KEY` | clé GTFS-Realtime du [portail développeurs STM](https://portail.developpeurs.stm.info/apihub/) (gratuite) : active la couche « bus en temps réel » et le collecteur. **Secret — jamais versionné** (Render : saisie dans le tableau de bord) | non défini (couche désactivée) |
+| `STM_API_KEY` | clé GTFS-Realtime du [portail développeurs STM](https://portail.developpeurs.stm.info/apihub/) (gratuite) : active la couche « bus en temps réel » et le collecteur.
 | `VIZ_DETOURS_ACTIONS` | `1` / `0` : autorise ou non les actions manuelles sur les détours (valider, supprimer, sourdine, tracer), qui modifient l'état partagé par tous les visiteurs | autorisées en local, **lecture seule** sur un hébergeur (`PORT` défini) |
 
 ### Mode statique — calcul en local, rendu en ligne
@@ -226,8 +226,7 @@ RSS mesuré (VIZ_LIGHT + payloads statiques) : **~180 Mo au démarrage, ~315 Mo
 au pic** (après une estimation de trajet) — large marge sur une instance
 512 Mo Render, contre 740 Mo en mode complet sans aucune optimisation.
 
-À relancer après toute régénération du pipeline (p01–p08), puis committer
-`data_derivee/payloads_statiques/`.
+À relancer après toute régénération du pipeline (p01–p08).
 
 ### Référentiel temps réel (GTFS en vigueur)
 
@@ -251,7 +250,7 @@ Il est séparé du pipeline pour trois raisons, mesurées sur le flux réel :
 - l'écart d'un bus au tracé de **son** trajet (médiane 3 m, p95 15 m) signale
   les détours : au-delà de 150 m, un ⚠ s'affiche (~4 % des bus).
 
-À relancer à chaque nouveau GTFS STM (la ligne de statut de la couche signale un
+À relancer à chaque nouveau GTFS (la ligne de statut de la couche signale un
 référentiel périmé quand plus de 20 % des trajets du flux y sont inconnus),
 puis committer le fichier.
 
@@ -363,10 +362,7 @@ Mesure un soir de semaine : 415 bus placés sur 542, 150 écarts, indice réseau
 ### Serveur de production
 
 Un blueprint **Render** (`render.yaml`) et un **`Procfile`** sont fournis.
-La commande de production utilise gunicorn (ajouté à `requirements.txt`),
-**sans `--preload`** : sous Linux, le fork gunicorn combiné au refcounting
-Python casse le copy-on-write et duplique les données maître/worker (→ OOM) ;
-sans preload, seul le worker porte les données.
+La commande de production utilise gunicorn (ajouté à `requirements.txt`).
 
 ```bash
 gunicorn --chdir serveur serveur_viz:app --workers 1 --timeout 300 --bind 0.0.0.0:$PORT
