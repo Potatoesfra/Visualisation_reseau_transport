@@ -78,7 +78,7 @@
     .galerie { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); }
     figure { margin: 0; background: var(--carte); border: 1px solid var(--bord); border-radius: 12px; overflow: hidden; }
     figure a { display: block; }
-    figure img { width: 100%; aspect-ratio: 880 / 550; object-fit: cover; object-position: top left; transition: transform .25s; }
+    figure img { width: 100%; height: auto; aspect-ratio: 880 / 550; object-fit: cover; object-position: top left; transition: transform .25s; }
     figure a:hover img { transform: scale(1.02); }
     figcaption { padding: 12px 14px 14px; font-size: .9rem; color: var(--doux); }
     figcaption b { color: var(--texte); display: block; margin-bottom: 2px; }
